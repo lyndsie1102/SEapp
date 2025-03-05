@@ -61,3 +61,7 @@ Refer to the code within the frontend and backend folders for a detailed underst
 Additional Notes:
 
 Feel free to customize this description to include specific details about your project, such as screenshots, additional features, or deployment instructions.
+
+## CREDITS:
+Adapted from: [https://github.com/Pakheria/Basic-Web-Application](https://github.com/Pakheria/Basic-Web-Application)
+
