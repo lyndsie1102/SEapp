@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Start the Flask backend
-cd /workspace
 echo "Starting Flask backend..."
 cd backend
 python main.py &
@@ -9,7 +8,7 @@ BACKEND_PID=$!
 
 # Start the React frontend
 echo "Starting React frontend..."
-cd /workspace/frontend
+cd ../frontend
 npm run dev &
 FRONTEND_PID=$!
 
