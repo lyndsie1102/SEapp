@@ -1,8 +1,12 @@
 {
   "name": "Basic Web Application",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspace",
+  "image": "mcr.microsoft.com/devcontainers/python:3.10",
+  // "settings": {
+  //   "terminal.integrated.shell.linux": "/bin/bash"
+  // },
+  // "dockerComposeFile": "docker-compose.yml",
+  // "service": "app",
+  // "workspaceFolder": "/workspace",
   "forwardPorts": [5000, 5173],
   "customizations": {
     "vscode": {
@@ -19,6 +23,6 @@
       }
     }
   },
-  "postCreateCommand": "pip install -r requirements.txt && cd frontend && npm install",
+  // "postCreateCommand": "pip install -r requirements.txt && cd frontend && npm install",
   "remoteUser": "vscode"
 }
