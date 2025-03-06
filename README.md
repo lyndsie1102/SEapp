@@ -21,8 +21,8 @@ git clone https://github.com/francescodelduchetto/CMP9134-2425-basicWebApp
 5. Wait until the setup is complete.
 
 
-## 2. Install requirements
-:exclamantion: The following commands needs to be launched from terminals inside VSCode (click Terminal > New Terminal).
+## 3. Install requirements
+:exclamation: The following commands needs to be launched from terminals inside VSCode (click Terminal > New Terminal).
 
 1. Install Python package requirements:
      ```Bash
@@ -42,7 +42,7 @@ git clone https://github.com/francescodelduchetto/CMP9134-2425-basicWebApp
      npm install
      ```
 
-## 3. Launch backend
+## 4. Launch backend
 Open a new VSCode Terminal and launch the following commands.
 
 ```Bash
@@ -52,7 +52,7 @@ cd ../backend
 python main.py
 ```
 
-## 4. Launch frontend
+## 5. Launch frontend
 On a different terminal, launch:
 
 ```Bash
