@@ -63,6 +63,14 @@ npm run dev
 ```
 This will start the development server for the frontend, usually accessible at http://localhost:5173/.
 
+# ❗If you plan to work with this template on your personal computer, you need the following installation steps as prerequisite
+
+### Setup your environment
+
+1. Make sure you have VSCode installed: https://code.visualstudio.com/download
+2. Make sure you have git installed: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+3. Make sure you have the `Docker` and the `Dev Containers` extension in VSCode installed and working: https://code.visualstudio.com/docs/containers/overview and https://code.visualstudio.com/docs/devcontainers/containers
+    * ensure docker is working, i.e. try `docker run --rm hello-world` and check it succeeds for your user
 
 ## CREDITS:
 Adapted from: [https://github.com/Pakheria/Basic-Web-Application](https://github.com/Pakheria/Basic-Web-Application)
