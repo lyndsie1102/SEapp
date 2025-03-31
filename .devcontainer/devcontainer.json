@@ -1,6 +1,6 @@
 {
   "name": "Basic Web Application",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "frontend",
 
   // "image": "mcr.microsoft.com/devcontainers/python:3.10",
