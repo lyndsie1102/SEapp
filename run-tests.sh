@@ -1,5 +1,7 @@
 #!/bin/bash
 
+docker-compose build backend-test frontend-test
+
 # Run backend tests
 echo "Running backend tests..."
 docker-compose run --rm backend-test
