@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "react-router-dom": "^7.5.0"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.26.3",
+    "babel-jest": "^29.7.0"
   }
 }

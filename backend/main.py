@@ -1,21 +1,27 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from config import Config
+from config import Config, db
 from models import Contact, User, RecentSearch
 from OpenverseAPIClient import OpenverseClient
 import os
 
-# Setup
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 CORS(app)
 
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
+db.init_app(app)
 
+jwt = JWTManager(app)
+jwt.init_app(app)
+
+@app.route('/')
+def index():
+    return "Welcome to the Backend!"
+
+@app.route('/api/test')
+def test_api():
+    return {"message": "Backend is working!"}
 
 @app.route("/register", methods=["POST"])
 def register():
