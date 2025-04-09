@@ -1,8 +1,102 @@
-from flask import request, jsonify
-from config import app, db
-from models import Contact
-
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from config import Config
+from models import Contact, User, RecentSearch
 from OpenverseAPIClient import OpenverseClient
+import os
+
+# Setup
+app = Flask(__name__)
+app.config.from_object(Config)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+CORS(app)
+
+db = SQLAlchemy(app)
+jwt = JWTManager(app)
+
+
+@app.route("/register", methods=["POST"])
+def register():
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"message": "User already exists"}), 409
+
+    new_user = User(email=email)
+    new_user.set_password(password)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "User registered successfully"}), 201
+
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user or not user.check_password(password):
+        return jsonify({"message": "Invalid email or password"}), 401
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify({"access_token": access_token, "user": user.to_json()}), 200
+
+@app.route("/profile", methods=["GET"])
+@jwt_required()
+def profile():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    return jsonify({"user": user.to_json()})
+
+@app.route("/recent_search", methods=["POST"])
+@jwt_required()
+def save_recent_search():
+    user_id = get_jwt_identity()
+    query = request.json.get("query")
+
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+
+    # Check for existing (user_id, query) combo
+    existing = RecentSearch.query.filter_by(user_id=user_id, query=query).first()
+    if existing:
+        return jsonify({"message": "Search already exists"}), 200
+        
+    new_search = RecentSearch(user_id=user_id, query=query)
+    db.session.add(new_search)
+    db.session.commit()
+
+    return jsonify({"message": "Search saved"}), 201
+
+@app.route("/recent_searches", methods=["GET"])
+@jwt_required()
+def get_recent_searches():
+    user_id = get_jwt_identity()
+    searches = RecentSearch.query.filter_by(user_id=user_id)\
+                                 .order_by(RecentSearch.timestamp.desc())\
+                                 .limit(5).all()
+    return jsonify([search.to_json() for search in searches]), 200
+
+@app.route("/recent_search/<int:search_id>", methods=["DELETE"])
+@jwt_required()
+def delete_recent_search(search_id):
+    user_id = get_jwt_identity()
+    search = RecentSearch.query.get(search_id)
+
+    if not search or search.user_id != user_id:
+        return jsonify({"error": "Search not found or unauthorized"}), 404
+
+    db.session.delete(search)
+    db.session.commit()
+    return jsonify({"message": "Search deleted"}), 200
 
 
 @app.route("/contacts", methods=["GET"])

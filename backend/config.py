@@ -1,11 +1,11 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
+# config.py
+import os
+from dotenv import load_dotenv
 
-app = Flask(__name__)
-CORS(app)
+load_dotenv()
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///appdatabase.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
-
-db = SQLAlchemy(app)
+class Config:
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    SQLALCHEMY_DATABASE_URI = "sqlite:///appdatabase.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

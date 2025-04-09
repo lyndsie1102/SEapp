@@ -12,6 +12,7 @@ services:
       - backend
     ports:
       - "5173:5173"
+  
 
   # Test services
   backend-test:

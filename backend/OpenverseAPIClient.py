@@ -1,6 +1,10 @@
 import requests
 import time
 from typing import Dict, Any, Optional, List
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class OpenverseClient:
     """
@@ -14,8 +18,8 @@ class OpenverseClient:
         self.access_token = None
         self.token_expiry = 0
         # You should replace these with your actual client credentials
-        self.client_id = ""
-        self.client_secret = ""
+        self.client_id = os.getenv("OPENVERSE_CLIENT_ID")
+        self.client_secret = os.getenv("OPENVERSE_CLIENT_SECRET")
     
     def _get_auth_token(self) -> str:
         """
