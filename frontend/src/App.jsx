@@ -1,27 +1,23 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import ContactManager from "./pages/ContactManager";
-import ImageSearch from "./pages/ImageSearch";
-import RegistrationForm from "./pages/RegistrationForm";
-import LoginForm from "./pages/LoginForm";
-import LandingPage from "./pages/LandingPage";
+// App.jsx
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import HomePage from './pages/HomePage';
+import LoginForm from './pages/LoginForm';
+import RegistrationForm from './pages/RegistrationForm';
+import ProtectedRoute from './components/ProtectRoute'; // Import the protected route
 
 function App() {
   return (
     <Router>
-      <div className="nav">
-        <Link to="/">Home</Link> |{" "}
-        <Link to="/contacts">Contacts</Link> |{" "}
-        <Link to="/images">Image Search</Link> |{" "}
-        <Link to="/register">Register</Link>
-        <Link to="/login">Login</Link>
-      </div>
-
       <Routes>
-        <Route path="/" element={<LandingPage />} /> {/* Default route */}
-        <Route path="/contacts" element={<ContactManager />} />
-        <Route path="/images" element={<ImageSearch />} />
-        <Route path="/register" element={<RegistrationForm />} />
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegistrationForm />} />
+
+        {/* Protected Routes */}
+        <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
       </Routes>
     </Router>
   );

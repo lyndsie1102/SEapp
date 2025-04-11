@@ -5,7 +5,7 @@ function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    username: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -24,16 +24,18 @@ function Register() {
     }
 
     try {
-      const response = await fetch("/register", {
+      const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: form.username,
+          email: form.email,
           password: form.password,
         }),
       });
 
       const data = await response.json();
+
+
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
@@ -51,11 +53,11 @@ function Register() {
       {error && <p className="text-red-600">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          name="username"
-          value={form.username}
+          name="email"
+          value={form.email}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
-          placeholder="Username"
+          placeholder="Email"
           required
         />
         <input

@@ -23,7 +23,7 @@ const LoginForm = () => {
     if (response.ok) {
       localStorage.setItem("token", data.access_token);
       setMessage("Login successful!");
-      navigate("/"); // Redirect to home page or dashboard
+      navigate("/home"); // Redirect to home page or dashboard
     } else {
       setMessage(data.message || "Login failed");
     }
