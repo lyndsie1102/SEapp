@@ -3,7 +3,8 @@ import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import LoginForm from './pages/LoginForm';
 import RegistrationForm from './pages/RegistrationForm';
-import ProtectedRoute from './components/ProtectRoute';
+import ProtectedRoute from './components/ProtectRoute'; 
+
 
 function App() {
   return (
