@@ -23,3 +23,28 @@
     font-size: 28px;
     font-weight: bold;
 }
+
+/* For full-page background color */
+.landing-page {
+    background-color: #f0f0f0; /* Light gray */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* For full-page background image */
+.landing-page-image {
+    background-image: url("https://images.pexels.com/photos/2088203/pexels-photo-2088203.jpeg");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: rgb(14, 13, 13); /* Text color */
+}
+
+
