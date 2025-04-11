@@ -9,12 +9,29 @@ const LandingPage = () => {
 
   return (
     <div className="landing-page-image">
-      <h1>Welcome to Huyen's App</h1>
-      {isLogin ? <LoginForm /> : <RegistrationForm />}
-      <div>
-        <p>Need an account? <Link to="/register">Register</Link></p>
+      <div className="form-card">
+        <h1 className="app-title">Welcome to Huyen's App</h1>
+        {isLogin ? <LoginForm /> : <RegistrationForm />}
+        <div className="toggle-link">
+          {isLogin ? (
+            <p>
+              Need an account?{" "}
+              <Link to="/register" onClick={() => setIsLogin(false)}>
+                Register
+              </Link>
+            </p>
+          ) : (
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" onClick={() => setIsLogin(true)}>
+                Login
+              </Link>
+            </p>
+          )}
+        </div>
       </div>
     </div>
+
   );
 };
 

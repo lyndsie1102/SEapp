@@ -7,10 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class OpenverseClient:
-    """
-    A client for the OpenVerse API (https://api.openverse.org/v1/)
-    that handles authentication and image search functionality.
-    """
     
     BASE_URL = "https://api.openverse.org/v1"
     
@@ -22,13 +18,6 @@ class OpenverseClient:
         self.client_secret = os.getenv("OPENVERSE_CLIENT_SECRET")
     
     def _get_auth_token(self) -> str:
-        """
-        Get an OAuth access token from the OpenVerse API.
-        Caches the token until it expires.
-        
-        Returns:
-            str: The access token
-        """
         current_time = time.time()
         
         # Return cached token if it's still valid
@@ -69,20 +58,7 @@ class OpenverseClient:
                     license_type: Optional[str] = None,
                     creator: Optional[str] = None,
                     tags: Optional[List[str]] = None) -> Dict[str, Any]:
-        """
-        Search for images on OpenVerse
         
-        Args:
-            query (str): The search query
-            page (int, optional): Page number for pagination. Defaults to 1.
-            page_size (int, optional): Number of results per page. Defaults to 20.
-            license_type (str, optional): Filter by license type.
-            creator (str, optional): Filter by creator.
-            tags (List[str], optional): List of tags to filter by.
-            
-        Returns:
-            Dict[str, Any]: The search results
-        """
         token = self._get_auth_token()
         if not token:
             return {"error": "Failed to authenticate with OpenVerse API"}

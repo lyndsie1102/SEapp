@@ -1,12 +1,24 @@
-import ContactManager from './ContactManager';
-import ImageSearch from './ImageSearch';
+import React from 'react';
+import { Link, Outlet } from 'react-router-dom';
+import "../App.css";
 
 const HomePage = () => {
   return (
-    <div>
-      <h1>Welcome to Your Dashboard</h1>
-      <ContactManager /> {/* Will only be accessible if user is logged in */}
-      <ImageSearch /> {/* Will only be accessible if user is logged in */}
+    <div className="home-container">
+      <nav className="sidebar">
+        <h2 className="sidebar-title">Dashboard</h2>
+        <ul className="nav-list">
+          <li><Link to="/home">🏠 Home</Link></li>
+          <li><Link to="/home/contacts">📇 Contacts</Link></li>
+          <li><Link to="/home/imagesearch">🔍 Image Search</Link></li>
+          <li><Link to="/">🚪 Logout</Link></li>
+        </ul>
+      </nav>
+
+      <main className="home-content">
+        {/* This is where nested routes will render */}
+        <Outlet />
+      </main>
     </div>
   );
 };
