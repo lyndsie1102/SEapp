@@ -1,3 +1,4 @@
+/* Modal Styles */
 .modal {
   position: fixed;
   z-index: 1;
@@ -24,21 +25,18 @@
   font-weight: bold;
 }
 
-/* For full-page background color */
+/* Landing Page Styles */
 .landing-page {
-  background-color: #f0f0f0;
-  /* Light gray */
-  height: 100vh;
-  /* Full viewport height */
+  background-color: #f0f0f0; /* Light gray */
+  height: 100vh; /* Full viewport height */
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 
-/* For full-page background image */
 .landing-page-image {
-  background-image: url("https://images.pexels.com/photos/2088203/pexels-photo-2088203.jpeg");
+  background-image: url("./components/c668ac193c0cf5c065795b2faf9e1988a1397bf0r1-370-200_hq.gif");
   background-size: cover;
   background-position: center;
   height: 100vh;
@@ -46,14 +44,12 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  color: rgb(14, 13, 13);
-  /* Text color */
+  color: rgb(14, 13, 13); /* Text color */
 }
 
-
+/* Form Card Styles */
 .form-card {
-  background-color: rgba(255, 255, 255, 0.95);
-  /* Slight transparency */
+  background-color: rgba(255, 255, 255, 0.95); /* Slight transparency */
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -74,11 +70,13 @@
   font-size: 0.9rem;
 }
 
+/* Home Container Styles */
 .home-container {
   display: flex;
   min-height: 100vh;
 }
 
+/* Sidebar Styles */
 .sidebar {
   width: 220px;
   background-color: #292b2c;
@@ -120,44 +118,31 @@
   background-color: #444;
 }
 
+/* Home Content Styles */
 .home-content {
   flex: 1;
   padding: 2rem;
   background-color: #f9f9f9;
 }
 
-/* In App.css or ImageSearch.css */
+/* Image Grid Styles */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
 }
 
-.image-grid img {
-  width: 100%;
-  height: 200px;
-  /* Set a fixed height */
-  object-fit: cover;
-  /* Make sure the image covers the box without distortion */
-}
-
-.image-grid p {
-  text-align: center;
-  margin-top: 5px;
-}
-
-/* New Styles for Image Search */
 .image-box {
-  border: 1px solid #ddd;   /* Border around each image box */
+  border: 1px solid #ccc; /* Border around each image box */
   padding: 10px;
-  text-align: center;        /* Center the title below the image */
+  text-align: center; /* Center the title below the image */
   background-color: #f9f9f9; /* Light background color */
-  border-radius: 8px;        /* Rounded corners */
-  overflow: hidden;          /* Ensure the content fits within the box */
+  border-radius: 8px; /* Rounded corners */
+  overflow: hidden; /* Ensure the content fits within the box */
 }
 
 .image-box .image {
-  width: 100%;   /* Make the image take up the full width of the box */
+  width: 100%; /* Make the image take up the full width of the box */
   height: 200px; /* Set a fixed height for consistency */
   object-fit: cover; /* Ensure the image covers the box without distortion */
   border-bottom: 1px solid #ddd; /* Optional: add a border between the image and title */
@@ -170,7 +155,7 @@
   font-weight: bold;
 }
 
-/* Loading overlay to cover the page */
+/* Loading Overlay Styles */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -184,7 +169,7 @@
   z-index: 10;
 }
 
-/* Loading spinner style */
+/* Loading Spinner Styles */
 .loading-spinner {
   border: 4px solid #f3f3f3; /* Light gray */
   border-top: 4px solid #3498db; /* Blue */
@@ -194,8 +179,84 @@
   animation: spin 2s linear infinite;
 }
 
-/* Animation for spinning */
+/* Animation for Spinning */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+/* Normalize form element appearance and alignment */
+.search-input,
+.filter-input,
+.search-button {
+  height: 38px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #2980b9;
+}
+
+/* Make sure filter groups are aligned center */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Adjust search container wrapping */
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+/* Filters container inline with search bar */
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-left: 3rem;
+}
+
+.filter-select {
+  height: 38px;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.audio-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.audio-card {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 300px;
+  background-color: #fff;
+}
+

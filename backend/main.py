@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import Config, db
-from models import Contact, User, RecentSearch
+from models import User, RecentSearch
 from OpenverseAPIClient import OpenverseClient
 import os
 
@@ -14,6 +14,8 @@ db.init_app(app)
 
 jwt = JWTManager(app)
 jwt.init_app(app)
+
+ov_client = OpenverseClient()
 
 @app.route('/')
 def index():
@@ -55,12 +57,6 @@ def login():
     access_token = create_access_token(identity=user.id)
     return jsonify({"access_token": access_token, "user": user.to_json()}), 200
 
-@app.route("/profile", methods=["GET"])
-@jwt_required()
-def profile():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    return jsonify({"user": user.to_json()})
 
 @app.route("/recent_search", methods=["POST"])
 @jwt_required()
@@ -105,64 +101,6 @@ def delete_recent_search(search_id):
     return jsonify({"message": "Search deleted"}), 200
 
 
-@app.route("/contacts", methods=["GET"])
-def get_contacts():
-    contacts = Contact.query.all()
-    json_contacts = list(map(lambda x: x.to_json(), contacts))
-    return jsonify({"contacts": json_contacts})
-
-
-@app.route("/create_contact", methods=["POST"])
-def create_contact():
-    first_name = request.json.get("firstName")
-    last_name = request.json.get("lastName")
-    email = request.json.get("email")
-
-    if not first_name or not last_name or not email:
-        return (
-            jsonify({"message": "You must include the first name, last name and email"}),
-            400,
-        )
-
-    new_contact = Contact(first_name=first_name, last_name=last_name, email=email)
-    try:
-        db.session.add(new_contact)
-        db.session.commit()
-    except Exception as e:
-        return jsonify({"message": str(e)}), 400
-
-    return jsonify({"message": "User created!"}), 201
-
-
-@app.route("/update_contact/<int:user_id>", methods=["PATCH"])
-def update_contact(user_id):
-    contact = Contact.query.get(user_id)
-    if not contact:
-        return jsonify({"message": "User not found"}), 404
-
-    data = request.json
-    contact.first_name = data.get("firstName", contact.first_name)
-    contact.last_name = data.get("lastName", contact.last_name)
-    contact.email = data.get("email", contact.email)
-
-    db.session.commit()
-
-    return jsonify({"message": "User updated"}), 200
-
-
-@app.route("/delete_contact/<int:user_id>", methods=["DELETE"])
-def delete_contact(user_id):
-    contact = Contact.query.get(user_id)
-
-    if not contact:
-        return jsonify({"message": "User not found"}), 404
-
-    db.session.delete(contact)
-    db.session.commit()
-
-    return jsonify({"message": "User deleted"}), 200
-
-ov_client = OpenverseClient()
 
 @app.route("/search_images", methods=["GET"])
 def search_images():
@@ -173,12 +111,8 @@ def search_images():
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 20, type=int)
     license_type = request.args.get("license")
-    creator = request.args.get("creator")
-    
-    # Handle tags as a comma-separated list
-    tags = request.args.get("tags")
-    if tags:
-        tags = tags.split(",")
+    source = request.args.get("source")
+    filetype = request.args.get("filetype")
     
     try:
         results = ov_client.search_images(
@@ -186,14 +120,45 @@ def search_images():
             page=page,
             page_size=page_size,
             license_type=license_type,
-            creator=creator,
-            tags=tags
+            source=source,
+            filetype=filetype
         )
     except Exception as e:
         print(f"Error calling Openverse API: {e}")
         return jsonify({"error": "Failed to fetch results from Openverse"}), 500
+
+    return jsonify(results)
+
+@app.route("/search_audio", methods=["GET"])
+def search_audio():
+    query = request.args.get("q")
+    if not query:
+        return jsonify({"error": "Search query is required"}), 400
+
+    page = request.args.get('page', 1, type=int)
+    page_size = request.args.get('page_size', 20, type=int)
+    license_type = request.args.get("license")
+    source = request.args.get("source")
+    category = request.args.get("category")
+    filetype = request.args.get("filetype")
+
+    try:
+        results = ov_client.search_audio(
+            query=query,
+            page=page,
+            page_size=page_size,
+            license_type=license_type,
+            category=category,
+            source=source,
+            filetype=filetype
+        )
+    except Exception as e:
+        print(f"Error calling Openverse API: {e}")
+        return jsonify({"error": "Failed to fetch audio results"}), 500
     
     return jsonify(results)
+    
+
 
 
 if __name__ == "__main__":

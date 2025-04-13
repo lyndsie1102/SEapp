@@ -3,8 +3,8 @@ import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import LoginForm from './pages/LoginForm';
 import RegistrationForm from './pages/RegistrationForm';
-import ContactManager from './pages/ContactManager';
 import ImageSearch from './pages/ImageSearch';
+import AudioSearch from './pages/AudioSearch';
 
 function App() {
   // Simulating authentication status (replace this with your actual logic)
@@ -29,8 +29,9 @@ function App() {
           element={<ProtectedRoute element={<HomePage />} />}
         >
           <Route path="" element={<div>Welcome to your dashboard!</div>} />
-          <Route path="contacts" element={<ContactManager />} />
+      
           <Route path="imagesearch" element={<ImageSearch />} />
+          <Route path="audiosearch" element={<AudioSearch />} />
           
         </Route>
       </Routes>

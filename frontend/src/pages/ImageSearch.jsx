@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import AdvancedFilter from "../components/AdvancedFilter";
 
 const ImageSearch = () => {
   const [query, setQuery] = useState("");
@@ -7,6 +8,19 @@ const ImageSearch = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [isSearching, setIsSearching] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const [filterValues, setFilterValues] = useState({});
+
+  const imageFilters = [
+    { name: "license", label: "License", type: "select", options: ["cc0", "by", "by-sa"] },
+    { name: "source", label: "Source", type: "text", placeholder: "e.g. stocksnap" },
+    { name: "filetype", label: "File Type", type: "select", options: ["jpg", "png", "svg"] },
+  ];
+
+  const handleFilterChange = (name, value) => {
+    setFilterValues((prev) => ({ ...prev, [name]: value }));
+    setPage(1);
+  };
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -15,14 +29,18 @@ const ImageSearch = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `/search_images?q=${encodeURIComponent(query)}&page=${page}&page_size=${pageSize}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const queryParams = new URLSearchParams({
+        q: query,
+        page,
+        page_size: pageSize,
+        ...filterValues,
+      });
+
+      const response = await fetch(`/search_images?${queryParams.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -37,8 +55,10 @@ const ImageSearch = () => {
             title: img.title || "Untitled Image",
           }))
         );
+        setTotalResults(data.result_count || 0);
       } else {
         setImages([]);
+        setTotalResults(0);
       }
 
       setError(null);
@@ -46,6 +66,7 @@ const ImageSearch = () => {
       console.error("Error fetching images:", e);
       setError("Error fetching images. Please try again.");
       setImages([]);
+      setTotalResults(0);
     } finally {
       setIsSearching(false);
     }
@@ -56,41 +77,104 @@ const ImageSearch = () => {
       handleSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize]);
+  }, [page, pageSize, filterValues]);
 
   const handleQueryChange = (e) => {
     setQuery(e.target.value);
-    setPage(1); // Reset page on new query
+    setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setPage(1); // Reset page when changing size
+    setPage(1);
   };
 
   return (
     <div>
       <h2>Image Search</h2>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          value={query}
-          onChange={handleQueryChange}
-          placeholder="Search for images..."
-        />
-        <button onClick={handleSearch} disabled={isSearching}>
-          {isSearching ? "Searching..." : "Search"}
-        </button>
+      {/* Search and Filter Container */}
+      <div className="search-container">
+        {/* Search Bar */}
+          <input
+            type="text"
+            value={query}
+            onChange={handleQueryChange}
+            placeholder="Search for images..."
+            className="search-input"
+          />
+          <button 
+            onClick={handleSearch} 
+            disabled={isSearching}
+            className="search-button"
+          >
+            {isSearching ? "Searching..." : "Search"}
+          </button>
+        
+
+        {/* Filters */}
+        <div className="filters-container">
+          {/* License Filter */}
+          <div className="filter-group">
+            <label className="filter-label">License:</label>
+            <select
+              value={filterValues.license || "Any"}
+              onChange={(e) => handleFilterChange("license", e.target.value)}
+              className="filter-select"
+            >
+              <option value="Any">Any</option>
+              <option value="cc0">CC0</option>
+              <option value="by">BY</option>
+              <option value="by-sa">BY-SA</option>
+            </select>
+          </div>
+
+          {/* Source Filter */}
+          <div className="filter-group">
+            <label className="filter-label">Source:</label>
+            <input
+              type="text"
+              value={filterValues.source || ""}
+              onChange={(e) => handleFilterChange("source", e.target.value)}
+              placeholder="e.g. stocksnap"
+              className="filter-input"
+            />
+          </div>
+
+          {/* File Type Filter */}
+          <div className="filter-group">
+            <label className="filter-label">File Type:</label>
+            <select
+              value={filterValues.filetype || "Any"}
+              onChange={(e) => handleFilterChange("filetype", e.target.value)}
+              className="filter-select"
+            >
+              <option value="Any">Any</option>
+              <option value="jpg">JPG</option>
+              <option value="png">PNG</option>
+              <option value="svg">SVG</option>
+              <option value="others">Others</option>
+            </select>
+          </div>
+
+          {/* Items per page */}
+          <div className="filter-group">
+            <label className="filter-label">Items per page:</label>
+            <select 
+              value={pageSize} 
+              onChange={handlePageSizeChange}
+              className="filter-select"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <label>Results per page: </label>
-        <select value={pageSize} onChange={handlePageSizeChange}>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={30}>30</option>
-        </select>
+        <strong>Total Results: </strong>{totalResults}
       </div>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
