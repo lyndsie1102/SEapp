@@ -31,7 +31,6 @@ const LoginForm = () => {
 
   return (
     <div>
-      <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <input
           type="email"
@@ -47,9 +46,11 @@ const LoginForm = () => {
           required
           onChange={(e) => setPassword(e.target.value)}
         /><br />
-        <button type="submit">Login</button>
+        <div className="button-container">
+        <button type="submit" className="login-button">Login</button>
+        </div>
       </form>
-      <p>{message}</p>
+      {message && <p className="text-red-600">{message}</p>}
     </div>
   );
 };

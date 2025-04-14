@@ -11,12 +11,21 @@ function Register() {
   });
   const [error, setError] = useState("");
 
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isValidEmail(form.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
@@ -35,13 +44,12 @@ function Register() {
 
       const data = await response.json();
 
-
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
 
-      // On success: redirect to login
-      navigate("/login");
+      // Redirect to landing page with login form active and success message
+      navigate("/", { state: { fromRegister: true } });
     } catch (err) {
       setError(err.message);
     }
@@ -49,41 +57,45 @@ function Register() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Register</h2>
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
-          placeholder="Email"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
-          placeholder="Password"
-          required
-        />
-        <input
-          name="confirmPassword"
-          type="password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
-          placeholder="Confirm Password"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Register
-        </button>
+        <div className="form-field">
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div className="form-field">
+          <input
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <div className="form-field">
+          <input
+            name="confirmPassword"
+            type="password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
+            placeholder="Confirm Password"
+            required
+          />
+        </div>
+        <div className="button-container">
+          <button type="submit" className="register-button">
+            Register
+          </button>
+        </div>
       </form>
     </div>
   );

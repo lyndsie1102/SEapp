@@ -1,4 +1,3 @@
-/* Modal Styles */
 .modal {
   position: fixed;
   z-index: 1;
@@ -27,8 +26,8 @@
 
 /* Landing Page Styles */
 .landing-page {
-  background-color: #f0f0f0; /* Light gray */
-  height: 100vh; /* Full viewport height */
+  background-color: #f0e4e9; 
+  height: 100vh; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -36,7 +35,6 @@
 }
 
 .landing-page-image {
-  background-image: url("./components/c668ac193c0cf5c065795b2faf9e1988a1397bf0r1-370-200_hq.gif");
   background-size: cover;
   background-position: center;
   height: 100vh;
@@ -53,7 +51,7 @@
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  width: 90%;
+  width: 50%;
   max-width: 400px;
   text-align: center;
 }
@@ -79,18 +77,19 @@
 /* Sidebar Styles */
 .sidebar {
   width: 220px;
-  background-color: #292b2c;
+  background-color: #ecdfe2;
   color: white;
   padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: start;
+  
 }
 
 .sidebar-title {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #fff;
+  color: #222020;
   font-weight: bold;
 }
 
@@ -106,16 +105,17 @@
 }
 
 .nav-list a {
-  color: white;
+  color: rgb(12, 12, 12);
   text-decoration: none;
   padding: 10px 15px;
   display: block;
   border-radius: 8px;
   transition: background-color 0.2s ease-in-out;
+  font-size: 1.1rem;
 }
 
 .nav-list a:hover {
-  background-color: #444;
+  background-color: #d389b2;
 }
 
 /* Home Content Styles */
@@ -260,3 +260,71 @@
   background-color: #fff;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.register-button,
+.login-button {
+  height: 20px;
+  background-color: #edcce2;
+  color: rgb(8, 8, 8);
+  border: none;
+  border-radius: 6px;
+  padding: 0 20px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+  
+}
+
+.register-button {
+  margin-top: 20px;
+}
+.register-button:hover,
+.login-button:hover {
+  background-color: #63a0c9;
+}
+
+.landing-container {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  width: 800px;
+  max-width: 400%;
+  height: 50vh
+}
+
+.image-section {
+  flex: 1;
+  background-image: url('./components/logo.jpeg');
+  background-size: cover;
+}
+
+
+
+.form-section {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Ensure error message is displayed in red */
+.text-red-600, .error-message {
+  color: #e53e3e !important;  /* Red color */
+}
