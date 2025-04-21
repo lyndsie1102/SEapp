@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import AdvancedFilter from "../components/AdvancedFilter";
 
 const ImageSearch = () => {
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -22,15 +24,15 @@ const ImageSearch = () => {
     setPage(1);
   };
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  const performSearch = async (searchQuery) => {
+    if (!searchQuery.trim()) return;
     setIsSearching(true);
 
     const token = localStorage.getItem("token");
 
     try {
       const queryParams = new URLSearchParams({
-        q: query,
+        q: searchQuery,
         page,
         page_size: pageSize,
         ...filterValues,
@@ -72,11 +74,25 @@ const ImageSearch = () => {
     }
   };
 
+  // Handle manual search button click
+  const handleSearch = () => {
+    setSearchParams({ q: query }); // Update URL
+    performSearch(query); // Perform the search
+  };
+
+  // Initialize from URL on first load
+  useEffect(() => {
+    const urlQuery = searchParams.get("q");
+    if (urlQuery) {
+      performSearch(urlQuery);
+    }
+  }, []);
+
+  // Handle filter/page changes
   useEffect(() => {
     if (query.trim()) {
-      handleSearch();
+      performSearch(query);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, filterValues]);
 
   const handleQueryChange = (e) => {
@@ -89,9 +105,46 @@ const ImageSearch = () => {
     setPage(1);
   };
 
+  const handleSaveSearch = async () => {
+    if (images.length === 0) {
+      alert("No results to save!");
+      return;
+    }
+
+    alert("Only the currently loaded results (Page 1) will be saved.");
+
+    try {
+      const token = localStorage.getItem("token");
+      const media_type = "image";
+      const response = await fetch("http://localhost:5000/save_search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query,
+          media_type,
+          results: images.map(item => ({ url: item.url }))
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Search saved successfully!");
+      } else {
+        alert("Error saving search: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  
+
   return (
     <div>
       <h2>Image Search</h2>
+      <button onClick={handleSaveSearch}>Save Search</button>
 
       {/* Search and Filter Container */}
       <div className="search-container">

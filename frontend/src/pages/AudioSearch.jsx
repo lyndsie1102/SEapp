@@ -54,9 +54,46 @@ const AudioSearch = () => {
     fetchAudioResults(filters);
   };
 
+  const handleSaveSearch = async () => {
+    if (results.length === 0) {
+      alert("No results to save!");
+      return;
+    }
+  
+    // Alert that only Page 1 results will be saved
+    alert("Only the currently loaded results (Page 1) will be saved.");
+  
+    try {
+      const token = localStorage.getItem("token");
+      const media_type = "audio";
+      const response = await fetch("http://localhost:5000/save_search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query,
+          media_type,
+          results: results.map(item => ({ url: item.url }))
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Search saved successfully!");
+      } else {
+        alert("Error saving search: " + data.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div>
       <h2>Audio Search</h2>
+      <button onClick={handleSaveSearch}>Save Search</button>
 
       <div className="search-container">
         <input

@@ -22,22 +22,32 @@ class User(db.Model):
 class RecentSearch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    query = db.Column(db.String(120), nullable=False)
-    media_type = db.Column(db.String(50), nullable=False)  # Add this line
-    filters = db.Column(db.JSON, nullable=True)  # Add this line
-    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp(), index=True)
+    search_query = db.Column(db.String(120), nullable=False)
+    media_type = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+    total_results = db.Column(db.Integer, nullable=False)
+    
 
-    # Update your unique constraint to include media_type
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'query', 'media_type', name='unique_user_query_media'),
-    )
+    search_results = db.relationship('SavedSearchResult', backref='recent_search', cascade="all, delete-orphan", lazy=True)
 
     def to_json(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "query": self.query,
-            "media_type": self.media_type,  # Add this
-            "filters": self.filters,  # Add this
-            "timestamp": self.timestamp.isoformat()
+            "search_query": self.search_query,
+            "media_type": self.media_type,
+            "timestamp": self.timestamp.isoformat(),
+            "total_results": self.total_results
+        }
+
+class SavedSearchResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    search_id = db.Column(db.Integer, db.ForeignKey('recent_search.id'), nullable=False)
+    media_url = db.Column(db.String(255), nullable=False)
+    media_type = db.Column(db.String(50), nullable=False)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "media_url": self.media_url,
+            "media_type": self.media_type
         }

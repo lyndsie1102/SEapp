@@ -5,6 +5,7 @@ import LoginForm from './pages/LoginForm';
 import RegistrationForm from './pages/RegistrationForm';
 import ImageSearch from './pages/ImageSearch';
 import AudioSearch from './pages/AudioSearch';
+import RecentSearches from './pages/RecentSearchesPage';
 
 function App() {
   // Simulating authentication status (replace this with your actual logic)
@@ -32,7 +33,8 @@ function App() {
       
           <Route path="imagesearch" element={<ImageSearch />} />
           <Route path="audiosearch" element={<AudioSearch />} />
-          
+          <Route path="recentsearches" element={<RecentSearches />} />
+
         </Route>
       </Routes>
     </Router>

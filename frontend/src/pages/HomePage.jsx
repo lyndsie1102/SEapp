@@ -9,8 +9,9 @@ const HomePage = () => {
         <h2 className="sidebar-title">Dashboard</h2>
         <ul className="nav-list">
           <li><Link to="/home">🏠 Home</Link></li>
-          <li><Link to="/home/imagesearch">🔍 Image Search</Link></li>
-          <li><Link to="/home/audiosearch">🔍 Audio Search </Link></li>
+          <li><Link to="/home/imagesearch">📷 Image Search</Link></li>
+          <li><Link to="/home/audiosearch">🎵 Audio Search </Link></li>
+          <li><Link to="/home/recentsearches">📁 Recent Searches</Link></li>
           <li><Link to="/">🚪 Logout</Link></li>
         </ul>
       </nav>

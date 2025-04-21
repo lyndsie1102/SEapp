@@ -3,13 +3,13 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import Config, db
 from werkzeug.security import check_password_hash
-from models import User, RecentSearch
+from models import User, RecentSearch, SavedSearchResult
 from OpenverseAPIClient import OpenverseClient
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
 db.init_app(app)
 
@@ -59,43 +59,51 @@ def login():
     return jsonify({"msg": "Invalid credentials"}), 401
 
 
-@app.route("/recent_search", methods=["POST"])
+@app.route("/save_search", methods=["POST"])
 @jwt_required()
-def save_recent_search():
+def save_search():
     user_id = get_jwt_identity()
     data = request.get_json()
 
     query = data.get("query")
     media_type = data.get("media_type")
-    filters = data.get("filters") or {}
+    results = data.get("results")
 
-    if not query or not media_type:
-        return jsonify({"error": "Query and media_type are required"}), 400
+    if not query or not media_type or not results:
+        return jsonify({"error": "Query, media_type, and results are required"}), 400
 
-    # Correct query syntax
-    existing = db.session.query(RecentSearch).filter(
-        RecentSearch.user_id == user_id,
-        RecentSearch.query == query,
-        RecentSearch.media_type == media_type
-    ).first()
+    total_results = len(results)
 
-    if existing:
-        return jsonify({"message": "Search already exists"}), 200
+    # Check how many saved searches this user has
+    saved_count = db.session.query(RecentSearch).filter_by(user_id=user_id).count()
+    if saved_count >= 10:
+        # Delete the oldest one
+        oldest_search = db.session.query(RecentSearch).filter_by(user_id=user_id).order_by(RecentSearch.timestamp.asc()).first()
+        db.session.delete(oldest_search)
+        db.session.commit()
 
-    new_search = RecentSearch(
+    # Create new saved search
+    saved_search = RecentSearch(
         user_id=user_id,
-        query=query,
+        search_query=query,
         media_type=media_type,
-        filters=filters
+        total_results=total_results
     )
-    
-    db.session.add(new_search)
+    db.session.add(saved_search)
+    db.session.flush()  # to get saved_search.id
+
+    # Save results URLs
+    for result in results:
+        search_result = SavedSearchResult(
+            search_id=saved_search.id,
+            media_url=result['url'],  # Ensure this key matches your result structure
+            media_type=result.get('media_type', media_type)  # Assuming you also have media_type in your result
+        )
+        db.session.add(search_result)
+
     db.session.commit()
 
-    return jsonify({
-        "message": "Search saved",
-        "search": new_search.to_json()  # Use the model's to_json method
-    }), 201
+    return jsonify({"message": "Search saved successfully", "search_id": saved_search.id}), 201
 
 
 
@@ -103,23 +111,37 @@ def save_recent_search():
 @jwt_required()
 def get_recent_searches():
     user_id = get_jwt_identity()
-    searches = RecentSearch.query.filter_by(user_id=user_id)\
-                                 .order_by(RecentSearch.timestamp.desc())\
-                                 .limit(5).all()
-    return jsonify([search.to_json() for search in searches]), 200
 
-@app.route("/recent_search/<int:search_id>", methods=["DELETE"])
+    # Fetch recent searches for the user
+    recent_searches = RecentSearch.query.filter_by(user_id=user_id).order_by(RecentSearch.timestamp.desc()).all()
+
+    # If no searches found, return an empty list
+    if not recent_searches:
+        return jsonify([]), 200
+
+    # Return a list of recent searches in JSON format
+    return jsonify([search.to_json() for search in recent_searches]), 200
+
+
+
+@app.route("/recent_searches/<int:search_id>", methods=["DELETE"])
 @jwt_required()
 def delete_recent_search(search_id):
     user_id = get_jwt_identity()
-    search = RecentSearch.query.get(search_id)
+    
+    # Secure query: Only fetch searches belonging to the current user
+    search = RecentSearch.query.filter_by(id=search_id, user_id=user_id).first()
 
-    if not search or search.user_id != user_id:
+    if not search:
         return jsonify({"error": "Search not found or unauthorized"}), 404
 
-    db.session.delete(search)
-    db.session.commit()
-    return jsonify({"message": "Search deleted"}), 200
+    try:
+        db.session.delete(search)
+        db.session.commit()
+        return jsonify({"message": "Search deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Database error", "details": str(e)}), 500
 
 
 
