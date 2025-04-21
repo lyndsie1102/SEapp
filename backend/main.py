@@ -2,13 +2,14 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import Config, db
+from werkzeug.security import check_password_hash
 from models import User, RecentSearch
 from OpenverseAPIClient import OpenverseClient
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 db.init_app(app)
 
@@ -46,37 +47,57 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.json.get("email")
-    password = request.json.get("password")
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user or not user.check_password(password):
-        return jsonify({"message": "Invalid email or password"}), 401
-
-    access_token = create_access_token(identity=user.id)
-    return jsonify({"access_token": access_token, "user": user.to_json()}), 200
+    data = request.get_json()
+    user = User.query.filter_by(email=data['email']).first()
+    
+    if user and check_password_hash(user.password_hash, data['password']):
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify({
+            "access_token": access_token,
+            "token_type": "Bearer"
+        })
+    return jsonify({"msg": "Invalid credentials"}), 401
 
 
 @app.route("/recent_search", methods=["POST"])
 @jwt_required()
 def save_recent_search():
     user_id = get_jwt_identity()
-    query = request.json.get("query")
+    data = request.get_json()
 
-    if not query:
-        return jsonify({"error": "Query is required"}), 400
+    query = data.get("query")
+    media_type = data.get("media_type")
+    filters = data.get("filters") or {}
 
-    # Check for existing (user_id, query) combo
-    existing = RecentSearch.query.filter_by(user_id=user_id, query=query).first()
+    if not query or not media_type:
+        return jsonify({"error": "Query and media_type are required"}), 400
+
+    # Correct query syntax
+    existing = db.session.query(RecentSearch).filter(
+        RecentSearch.user_id == user_id,
+        RecentSearch.query == query,
+        RecentSearch.media_type == media_type
+    ).first()
+
     if existing:
         return jsonify({"message": "Search already exists"}), 200
-        
-    new_search = RecentSearch(user_id=user_id, query=query)
+
+    new_search = RecentSearch(
+        user_id=user_id,
+        query=query,
+        media_type=media_type,
+        filters=filters
+    )
+    
     db.session.add(new_search)
     db.session.commit()
 
-    return jsonify({"message": "Search saved"}), 201
+    return jsonify({
+        "message": "Search saved",
+        "search": new_search.to_json()  # Use the model's to_json method
+    }), 201
+
+
 
 @app.route("/recent_searches", methods=["GET"])
 @jwt_required()
