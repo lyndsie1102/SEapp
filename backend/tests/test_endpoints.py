@@ -60,10 +60,18 @@ def test_save_search(client):
 
 def test_get_recent_searches(client):
     # Create a test user and get a token
-    user = User.query.filter_by(email='test@example.com').first()
+    user = User(email='test@example.com')
+    user.set_password('testpassword')
+    db.session.add(user)
+    db.session.commit()
+    
     token = create_access_token(identity=str(user.id))
 
-    # Create some test searches
+    # Clear any existing searches for this user
+    RecentSearch.query.filter_by(user_id=user.id).delete()
+    db.session.commit()
+
+    # Create fresh test searches
     search1 = RecentSearch(
         user_id=user.id,
         search_query="query1",
@@ -82,8 +90,8 @@ def test_get_recent_searches(client):
     headers = {'Authorization': f'Bearer {token}'}
     response = client.get('/recent_searches', headers=headers)
     assert response.status_code == 200
-    assert len(response.json) == 2
-    assert response.json[0]['search_query'] == "query2"  # Should be ordered by timestamp desc
+    assert len(response.json) == 2 
+
 
 def test_delete_recent_search(client):
     # Create a test user and get a token

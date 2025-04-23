@@ -1,6 +1,6 @@
 import pytest
 from main import app, db
-from models import User
+from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 
 pytest_plugins = ['pytest_mock']
@@ -43,3 +43,13 @@ def auth_client(client):
     # Cleanup
     with app.app_context():
         client.environ_base.pop('HTTP_AUTHORIZATION', None)
+
+@pytest.fixture(autouse=True)
+def clean_db():
+    """Automatically clean up between tests"""
+    yield
+    with app.app_context():
+        db.session.rollback()
+        User.query.delete()
+        RecentSearch.query.delete()
+        db.session.commit()
