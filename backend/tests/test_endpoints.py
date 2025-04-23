@@ -3,10 +3,8 @@ from main import app, db
 from models import User, RecentSearch, SavedSearchResult
 from werkzeug.security import generate_password_hash
 import json
-from flask_jwt_extended import create_access_token
 
-
-def test_register(client, auth_client):
+def test_register(client, test_user):
     # Test successful registration
     data = {'email': 'new@example.com', 'password': 'newpassword'}
     response = client.post('/register', json=data)
@@ -24,7 +22,7 @@ def test_register(client, auth_client):
     assert response.status_code == 409
     assert "User already exists" in response.json['message']
 
-def test_login(client, auth_client):
+def test_login(client, test_user):
     # Test successful login
     data = {'email': 'test@example.com', 'password': 'testpassword'}
     response = client.post('/login', json=data)
@@ -37,49 +35,32 @@ def test_login(client, auth_client):
     assert response.status_code == 401
     assert response.json == {"msg": "Invalid credentials"}
 
-def test_save_search(client):
-    # Create a test user and get a token
-    user = User.query.filter_by(email='test@example.com').first()
-    token = create_access_token(identity=str(user.id))
-
+def test_save_search(auth_client, test_user):
     # Test successful save
     data = {
         "query": "test query",
         "media_type": "image",
         "results": [{"url": "http://example.com/image1.jpg", "media_type": "image"}]
     }
-    headers = {'Authorization': f'Bearer {token}'}
-    response = client.post('/save_search', json=data, headers=headers)
+    response = auth_client.post('/save_search', json=data)
     assert response.status_code == 201
     assert "Search saved successfully" in response.json['message']
 
     # Test missing fields
-    response = client.post('/save_search', json={}, headers=headers)
+    response = auth_client.post('/save_search', json={})
     assert response.status_code == 400
     assert "Query, media_type, and results are required" in response.json['error']
 
-def test_get_recent_searches(client):
-    # Create a test user and get a token
-    user = User(email='test@example.com')
-    user.set_password('testpassword')
-    db.session.add(user)
-    db.session.commit()
-    
-    token = create_access_token(identity=str(user.id))
-
-    # Clear any existing searches for this user
-    RecentSearch.query.filter_by(user_id=user.id).delete()
-    db.session.commit()
-
+def test_get_recent_searches(auth_client, test_user):
     # Create fresh test searches
     search1 = RecentSearch(
-        user_id=user.id,
+        user_id=test_user.id,
         search_query="query1",
         media_type="image",
         total_results=10
     )
     search2 = RecentSearch(
-        user_id=user.id,
+        user_id=test_user.id,
         search_query="query2",
         media_type="audio",
         total_results=5
@@ -87,20 +68,15 @@ def test_get_recent_searches(client):
     db.session.add_all([search1, search2])
     db.session.commit()
 
-    headers = {'Authorization': f'Bearer {token}'}
-    response = client.get('/recent_searches', headers=headers)
+    response = auth_client.get('/recent_searches')
     assert response.status_code == 200
-    assert len(response.json) == 2 
+    assert len(response.json) == 2
+    assert {s['search_query'] for s in response.json} == {'query1', 'query2'}
 
-
-def test_delete_recent_search(client):
-    # Create a test user and get a token
-    user = User.query.filter_by(email='test@example.com').first()
-    token = create_access_token(identity=str(user.id))
-
+def test_delete_recent_search(auth_client, test_user):
     # Create a test search
     search = RecentSearch(
-        user_id=user.id,
+        user_id=test_user.id,
         search_query="test query",
         media_type="image",
         total_results=5
@@ -108,13 +84,12 @@ def test_delete_recent_search(client):
     db.session.add(search)
     db.session.commit()
 
-    headers = {'Authorization': f'Bearer {token}'}
-    response = client.delete(f'/recent_searches/{search.id}', headers=headers)
+    response = auth_client.delete(f'/recent_searches/{search.id}')
     assert response.status_code == 200
     assert "Search deleted successfully" in response.json['message']
 
     # Test deleting non-existent search
-    response = client.delete('/recent_searches/999', headers=headers)
+    response = auth_client.delete('/recent_searches/999')
     assert response.status_code == 404
     assert "Search not found or unauthorized" in response.json['error']
 

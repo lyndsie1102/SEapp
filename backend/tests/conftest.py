@@ -2,54 +2,74 @@ import pytest
 from main import app, db
 from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
+from flask_jwt_extended import create_access_token
 
-pytest_plugins = ['pytest_mock']
-
+# Core fixtures
 @pytest.fixture(scope='module')
-def client():
-    # Configure test app
+def app_ctx():
+    """Application context"""
+    with app.app_context():
+        yield app
+
+@pytest.fixture
+def client(app_ctx):
+    """Test client fixture"""
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = 'test-secret'  # Needed for JWT
     
-    # Create all tables
     with app.app_context():
         db.create_all()
         yield app.test_client()
-        db.session.remove()
         db.drop_all()
 
-@pytest.fixture
-def auth_client(client):
-    # Create test user
-    with app.app_context():
-        # Create test user if not exists
-        user = User.query.filter_by(email='test@example.com').first()
-        if not user:
-            user = User(email='test@example.com')
-            user.set_password('testpassword')
-            db.session.add(user)
-            db.session.commit()
-        
-        # Generate token
-        from flask_jwt_extended import create_access_token
-        token = create_access_token(identity=str(user.id))
-        
-        # Set auth header
-        client.environ_base['HTTP_AUTHORIZATION'] = f'Bearer {token}'
-    
-    yield client
-    
-    # Cleanup
-    with app.app_context():
-        client.environ_base.pop('HTTP_AUTHORIZATION', None)
-
+# Database fixtures
 @pytest.fixture(autouse=True)
-def clean_db():
-    """Automatically clean up between tests"""
+def clean_db(client):
+    """Auto-clean database between tests"""
     yield
     with app.app_context():
         db.session.rollback()
-        User.query.delete()
-        RecentSearch.query.delete()
+        for table in reversed(db.metadata.sorted_tables):
+            db.session.execute(table.delete())
         db.session.commit()
+
+# User fixtures
+@pytest.fixture
+def test_user():
+    """Create a test user"""
+    with app.app_context():
+        user = User(email='test@example.com')
+        user.set_password('testpassword')
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+@pytest.fixture
+def auth_headers(test_user):
+    """Generate auth headers for test user"""
+    user_id = str(test_user.id)
+    with app.app_context():
+        token = create_access_token(identity=str(test_user.id))
+        return {'Authorization': f'Bearer {token}'}
+
+@pytest.fixture
+def auth_client(client, auth_headers):
+    """Authenticated test client"""
+    client.environ_base.update(auth_headers)
+    return client
+
+# Test data fixtures
+@pytest.fixture
+def test_search(test_user):
+    """Create test search record"""
+    with app.app_context():
+        search = RecentSearch(
+            user_id=test_user.id,
+            search_query="test query",
+            media_type="image",
+            total_results=5
+        )
+        db.session.add(search)
+        db.session.commit()
+        return search
