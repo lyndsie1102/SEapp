@@ -6,7 +6,7 @@ import json
 from flask_jwt_extended import create_access_token
 
 
-def test_register(client, init_database):
+def test_register(client, auth_client):
     # Test successful registration
     data = {'email': 'new@example.com', 'password': 'newpassword'}
     response = client.post('/register', json=data)
@@ -24,7 +24,7 @@ def test_register(client, init_database):
     assert response.status_code == 409
     assert "User already exists" in response.json['message']
 
-def test_login(client, init_database):
+def test_login(client, auth_client):
     # Test successful login
     data = {'email': 'test@example.com', 'password': 'testpassword'}
     response = client.post('/login', json=data)
