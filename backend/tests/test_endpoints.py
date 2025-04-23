@@ -2,6 +2,7 @@ import pytest
 from models import User, RecentSearch, SavedSearchResult
 from flask_jwt_extended import create_access_token
 from datetime import datetime, timedelta
+from main import app, db
 
 def test_register(client):
     # Successful registration
