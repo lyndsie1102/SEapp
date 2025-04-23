@@ -3,8 +3,21 @@ from main import app, db
 from models import User, RecentSearch, SavedSearchResult
 from werkzeug.security import generate_password_hash
 import json
+from flask_jwt_extended import create_access_token
+from config import Config
 
-def test_register(client, test_user):
+
+def test_index(client):
+    response = client.get('/')
+    assert response.status_code == 200
+    assert b"Welcome to the Backend!" in response.data
+
+def test_test_api(client):
+    response = client.get('/api/test')
+    assert response.status_code == 200
+    assert response.json == {"message": "Backend is working!"}
+
+def test_register(client):
     # Test successful registration
     data = {'email': 'new@example.com', 'password': 'newpassword'}
     response = client.post('/register', json=data)
@@ -17,12 +30,11 @@ def test_register(client, test_user):
     assert "Email and password are required" in response.json['message']
 
     # Test duplicate email
-    response = client.post('/register', 
-        json={'email': 'test@example.com', 'password': 'password'})
+    response = client.post('/register', json={'email': 'test@example.com', 'password': 'password'})
     assert response.status_code == 409
     assert "User already exists" in response.json['message']
 
-def test_login(client, test_user):
+def test_login(client):
     # Test successful login
     data = {'email': 'test@example.com', 'password': 'testpassword'}
     response = client.post('/login', json=data)
@@ -35,32 +47,41 @@ def test_login(client, test_user):
     assert response.status_code == 401
     assert response.json == {"msg": "Invalid credentials"}
 
-def test_save_search(auth_client, test_user):
+def test_save_search(client):
+    # Create a test user and get a token
+    user = User.query.filter_by(email='test@example.com').first()
+    token = create_access_token(identity=str(user.id))
+
     # Test successful save
     data = {
         "query": "test query",
         "media_type": "image",
         "results": [{"url": "http://example.com/image1.jpg", "media_type": "image"}]
     }
-    response = auth_client.post('/save_search', json=data)
+    headers = {'Authorization': f'Bearer {token}'}
+    response = client.post('/save_search', json=data, headers=headers)
     assert response.status_code == 201
     assert "Search saved successfully" in response.json['message']
 
     # Test missing fields
-    response = auth_client.post('/save_search', json={})
+    response = client.post('/save_search', json={}, headers=headers)
     assert response.status_code == 400
     assert "Query, media_type, and results are required" in response.json['error']
 
-def test_get_recent_searches(auth_client, test_user):
-    # Create fresh test searches
+def test_get_recent_searches(client):
+    # Create a test user and get a token
+    user = User.query.filter_by(email='test@example.com').first()
+    token = create_access_token(identity=str(user.id))
+
+    # Create some test searches
     search1 = RecentSearch(
-        user_id=test_user.id,
+        user_id=user.id,
         search_query="query1",
         media_type="image",
         total_results=10
     )
     search2 = RecentSearch(
-        user_id=test_user.id,
+        user_id=user.id,
         search_query="query2",
         media_type="audio",
         total_results=5
@@ -68,15 +89,20 @@ def test_get_recent_searches(auth_client, test_user):
     db.session.add_all([search1, search2])
     db.session.commit()
 
-    response = auth_client.get('/recent_searches')
+    headers = {'Authorization': f'Bearer {token}'}
+    response = client.get('/recent_searches', headers=headers)
     assert response.status_code == 200
     assert len(response.json) == 2
-    assert {s['search_query'] for s in response.json} == {'query1', 'query2'}
+    assert response.json[0]['search_query'] == "query2"  # Should be ordered by timestamp desc
 
-def test_delete_recent_search(auth_client, test_user):
+def test_delete_recent_search(client):
+    # Create a test user and get a token
+    user = User.query.filter_by(email='test@example.com').first()
+    token = create_access_token(identity=str(user.id))
+
     # Create a test search
     search = RecentSearch(
-        user_id=test_user.id,
+        user_id=user.id,
         search_query="test query",
         media_type="image",
         total_results=5
@@ -84,12 +110,13 @@ def test_delete_recent_search(auth_client, test_user):
     db.session.add(search)
     db.session.commit()
 
-    response = auth_client.delete(f'/recent_searches/{search.id}')
+    headers = {'Authorization': f'Bearer {token}'}
+    response = client.delete(f'/recent_searches/{search.id}', headers=headers)
     assert response.status_code == 200
     assert "Search deleted successfully" in response.json['message']
 
     # Test deleting non-existent search
-    response = auth_client.delete('/recent_searches/999')
+    response = client.delete('/recent_searches/999', headers=headers)
     assert response.status_code == 404
     assert "Search not found or unauthorized" in response.json['error']
 

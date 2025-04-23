@@ -26,6 +26,7 @@ def index():
 def test_api():
     return {"message": "Backend is working!"}
 
+
 @app.route("/register", methods=["POST"])
 def register():
     email = request.json.get("email")
