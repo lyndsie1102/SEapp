@@ -7,4 +7,5 @@ Werkzeug==2.2.2
 requests
 pytest-mock>=3.10
 flask_jwt_extended
+python-dotenv
 
