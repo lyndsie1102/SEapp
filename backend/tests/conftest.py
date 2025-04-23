@@ -1,49 +1,49 @@
 import pytest
 from main import app, db
 from models import User
+from werkzeug.security import generate_password_hash
+import json
 from flask_jwt_extended import create_access_token
-
-
 
 @pytest.fixture(scope='module')
 def test_client():
+    # Configure test app
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    # 🔥 Add secret keys for JWT
-    app.config['SECRET_KEY'] = 'test-secret'
-    app.config['JWT_SECRET_KEY'] = 'jwt-test-secret'
-
+    app.config['JWT_SECRET_KEY'] = 'test-secret-key'
+    
+    # Create all tables
     with app.app_context():
         db.create_all()
-
-    yield app.test_client()
-
+    
+    # Create test client
+    testing_client = app.test_client()
+    
+    # Establish application context
+    ctx = app.app_context()
+    ctx.push()
+    
+    yield testing_client
+    
+    # Cleanup
     with app.app_context():
+        db.session.remove()
         db.drop_all()
-
-
-@pytest.fixture
-def client(test_client):
-    return test_client
+    ctx.pop()
 
 @pytest.fixture
-def create_test_user():
-    def _create():
-        with app.app_context():
-            user = User.query.filter_by(email='test@example.com').first()
-            if not user:
-                user = User(email='test@example.com')
-                user.set_password('testpassword')
-                db.session.add(user)
-                db.session.commit()
-            return user
-    return _create
-
-@pytest.fixture
-def auth_headers(test_client, create_test_user):
-    user = create_test_user()
+def init_database(test_client):
+    # Create test user
+    user = User(email='test@example.com')
+    user.set_password('testpassword')
+    db.session.add(user)
+    db.session.commit()
+    
+    yield
+    
+    # Clean up after each test
     with app.app_context():
-        token = create_access_token(identity=str(user.id))
-        return {'Authorization': f'Bearer {token}'}
+        db.session.remove()
+        User.query.delete()
+        db.session.commit()
