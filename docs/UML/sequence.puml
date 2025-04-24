@@ -1,0 +1,15 @@
+@startuml
+actor User as U
+participant "Frontend" as FE
+participant "Backend" as BE
+participant "OpenverseAPI" as API
+participant "Database" as DB
+
+U -> FE: Enter search query
+FE -> BE: POST /search (query, filters)
+BE -> API: fetchMedia(query, filters)
+API --> BE: Return media results
+BE -> DB: Save search history (if logged in)
+BE --> FE: Return results
+FE --> U: Display media grid
+@enduml
