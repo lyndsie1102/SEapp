@@ -1,5 +1,5 @@
 import pytest
-from main import app
+from main import app, ov_client
 from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 import json
@@ -116,3 +116,30 @@ def test_delete_recent_search(test_client, init_database):
     assert response.status_code == 404
     assert "Search not found or unauthorized" in response.json['error']
 
+def test_search_images(test_client, mocker):
+    # Mock the OpenverseClient
+    mock_results = {"results": [{"id": 1, "title": "Test Image"}]}
+    mocker.patch('main.ov_client.search_images', return_value=mock_results)
+
+    response = test_client.get('/search_images?q=test')
+    assert response.status_code == 200
+    assert response.json == mock_results
+
+    # Test missing query
+    response = test_client.get('/search_images')
+    assert response.status_code == 400
+    assert "Search query is required" in response.json['error']
+
+def test_search_audio(test_client, mocker):
+    # Mock the OpenverseClient
+    mock_results = {"results": [{"id": 1, "title": "Test Audio"}]}
+    mocker.patch('main.ov_client.search_audio', return_value=mock_results)
+
+    response = test_client.get('/search_audio?q=test')
+    assert response.status_code == 200
+    assert response.json == mock_results
+
+    # Test missing query
+    response = test_client.get('/search_audio')
+    assert response.status_code == 400
+    assert "Search query is required" in response.json['error']
