@@ -26,7 +26,7 @@ class RecentSearch(db.Model):
     media_type = db.Column(db.String(50), nullable=False)
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
     total_results = db.Column(db.Integer, nullable=False)
-    
+    filters = db.Column(db.JSON)
 
     search_results = db.relationship('SavedSearchResult', backref='recent_search', cascade="all, delete-orphan", lazy=True)
 

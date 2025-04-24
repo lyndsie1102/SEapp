@@ -9,9 +9,15 @@ const ImageSearch = () => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
-  const [filterValues, setFilterValues] = useState({});
+  const [pendingSourceFilter, setPendingSourceFilter] = useState("");
+  const [filterValues, setFilterValues] = useState({
+    license: "",
+    source: "",
+    filetype: ""
+  });
 
   const imageFilters = [
     { name: "license", label: "License", type: "select", options: ["cc0", "by", "by-sa"] },
@@ -19,56 +25,136 @@ const ImageSearch = () => {
     { name: "filetype", label: "File Type", type: "select", options: ["jpg", "png", "svg"] },
   ];
 
-  const handleFilterChange = (name, value) => {
-    setFilterValues((prev) => ({ ...prev, [name]: value }));
-    setPage(1);
+  const checkRateLimit = async () => {
+    try {
+      const response = await fetch('/rate_limit');
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.error("Failed to check rate limits", e);
+      return null;
+    }
+  };
+
+
+
+  const handleFilterChange = (name, value, isTextInput = false) => {
+    if (name === "source" && isTextInput) {
+      // For source text input, just update the pending value
+      setPendingSourceFilter(value);
+      return;
+    }
+
+    // For non-text inputs (selects), proceed with immediate update
+    const newFilters = { ...filterValues, [name]: value };
+    setFilterValues(newFilters);
+
+    // Update URL with all current parameters
+    const params = {
+      q: query,
+      ...newFilters
+    };
+
+    // Clean empty/undefined values
+    Object.keys(params).forEach(key => {
+      if (!params[key] || params[key] === "Any") delete params[key];
+    });
+
+    setSearchParams(params);
+    setPage(1); // Reset to first page when filters change
+  };
+
+  const handleSourceFilterKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const newFilters = { ...filterValues, source: pendingSourceFilter };
+      setFilterValues(newFilters);
+
+      // Update URL
+      const params = {
+        q: query,
+        ...newFilters
+      };
+      Object.keys(params).forEach(key => {
+        if (!params[key] || params[key] === "Any") delete params[key];
+      });
+      setSearchParams(params);
+      setPage(1);
+    }
   };
 
   const performSearch = async (searchQuery) => {
-    if (!searchQuery.trim()) return;
+    // 1. Check rate limits first
+    const limits = await checkRateLimit();
+    if (limits?.remaining <= 0) {
+      setError(`Rate limit exceeded. Try again in ${Math.ceil(limits.reset_in)} seconds`);
+      setIsSearching(false);
+      return;
+    }
+
+    // 2. Validate search query
+    if (!searchQuery.trim()) {
+      setIsSearching(false);
+      return;
+    }
+
     setIsSearching(true);
 
-    const token = localStorage.getItem("token");
+    // 3. Prepare query parameters
+    const queryParams = new URLSearchParams({
+      q: searchQuery,
+      page,
+      page_size: pageSize
+    });
+
+    // Add active filters
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (value && value !== "Any") {
+        queryParams.append(key, value);
+      }
+    });
 
     try {
-      const queryParams = new URLSearchParams({
-        q: searchQuery,
-        page,
-        page_size: pageSize,
-        ...filterValues,
-      });
-
+      // 4. Make the API request
+      const token = localStorage.getItem("token");
       const response = await fetch(`/search_images?${queryParams.toString()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      // 5. Handle response
       if (!response.ok) {
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || 30;
+          throw new Error(`Rate limit exceeded. Try again in ${retryAfter} seconds`);
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (data.results) {
-        setImages(
-          data.results.map((img) => ({
-            url: img.thumbnail || img.url,
-            title: img.title || "Untitled Image",
-          }))
-        );
-        setTotalResults(data.result_count || 0);
-      } else {
-        setImages([]);
-        setTotalResults(0);
-      }
-
+      // 6. Process successful response
+      const results = data.results || [];
+      setImages(results.map(img => ({
+        url: img.thumbnail || img.url,
+        title: img.title || "Untitled Image",
+      })));
+      const resultCount = data.result_count || results.length;
+      setTotalResults(data.result_count || results.length);
+      setTotalPages(Math.ceil((data.result_count || results.length) / pageSize));
       setError(null);
+
     } catch (e) {
-      console.error("Error fetching images:", e);
-      setError("Error fetching images. Please try again.");
+      // 7. Handle errors
+      console.error("Search error:", e);
+      setError(e.message.includes("Rate limit") ? e.message : "Error fetching images. Please try again.");
       setImages([]);
       setTotalResults(0);
+
+      // Auto-retry for rate limits
+      if (e.message.includes("Rate limit")) {
+        setTimeout(() => performSearch(searchQuery), 2000);
+      }
     } finally {
       setIsSearching(false);
     }
@@ -76,17 +162,26 @@ const ImageSearch = () => {
 
   // Handle manual search button click
   const handleSearch = () => {
-    setSearchParams({ q: query }); // Update URL
-    performSearch(query); // Perform the search
+    performSearch(query);
   };
 
   // Initialize from URL on first load
+  // Initialize from URL on first load
   useEffect(() => {
     const urlQuery = searchParams.get("q");
+    const initialFilters = {
+      license: searchParams.get("license") || "",
+      source: searchParams.get("source") || "",
+      filetype: searchParams.get("filetype") || ""
+    };
+
+    setFilterValues(initialFilters);
+    setQuery(urlQuery || "");
+
     if (urlQuery) {
       performSearch(urlQuery);
     }
-  }, []);
+  }, [searchParams]);
 
   // Handle filter/page changes
   useEffect(() => {
@@ -115,7 +210,6 @@ const ImageSearch = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const media_type = "image";
       const response = await fetch("http://localhost:5000/save_search", {
         method: "POST",
         headers: {
@@ -124,8 +218,9 @@ const ImageSearch = () => {
         },
         body: JSON.stringify({
           query,
-          media_type,
-          results: images.map(item => ({ url: item.url }))
+          media_type: "image",  // Defined here
+          results: images.map(item => ({ url: item.url })),
+          filters: filterValues  // Now properly formatted
         }),
       });
 
@@ -139,7 +234,7 @@ const ImageSearch = () => {
       console.error("Error:", error);
     }
   };
-  
+
 
   return (
     <div>
@@ -149,21 +244,21 @@ const ImageSearch = () => {
       {/* Search and Filter Container */}
       <div className="search-container">
         {/* Search Bar */}
-          <input
-            type="text"
-            value={query}
-            onChange={handleQueryChange}
-            placeholder="Search for images..."
-            className="search-input"
-          />
-          <button 
-            onClick={handleSearch} 
-            disabled={isSearching}
-            className="search-button"
-          >
-            {isSearching ? "Searching..." : "Search"}
-          </button>
-        
+        <input
+          type="text"
+          value={query}
+          onChange={handleQueryChange}
+          placeholder="Search for images..."
+          className="search-input"
+        />
+        <button
+          onClick={handleSearch}
+          disabled={isSearching}
+          className="search-button"
+        >
+          {isSearching ? "Searching..." : "Search"}
+        </button>
+
 
         {/* Filters */}
         <div className="filters-container">
@@ -187,11 +282,13 @@ const ImageSearch = () => {
             <label className="filter-label">Source:</label>
             <input
               type="text"
-              value={filterValues.source || ""}
-              onChange={(e) => handleFilterChange("source", e.target.value)}
+              value={pendingSourceFilter}
+              onChange={(e) => handleFilterChange("source", e.target.value, true)}
+              onKeyDown={handleSourceFilterKeyDown}
               placeholder="e.g. stocksnap"
               className="filter-input"
             />
+
           </div>
 
           {/* File Type Filter */}
@@ -213,8 +310,8 @@ const ImageSearch = () => {
           {/* Items per page */}
           <div className="filter-group">
             <label className="filter-label">Items per page:</label>
-            <select 
-              value={pageSize} 
+            <select
+              value={pageSize}
               onChange={handlePageSizeChange}
               className="filter-select"
             >
@@ -242,13 +339,21 @@ const ImageSearch = () => {
         {images.length > 0 ? (
           images.map((image, index) => (
             <div key={index} className="image-box">
-              <img src={image.url} alt={image.title} className="image" />
+              <img
+                src={image.url}
+                alt={image.title}
+                className="image"
+                onError={(e) => {
+                  e.target.src = 'fallback-image-url.jpg'; // Add error handling
+                  console.error("Failed to load image:", image.url);
+                }}
+              />
               <p className="image-title">{image.title}</p>
             </div>
           ))
-        ) : (
-          <p>No images to display. Try searching for something!</p>
-        )}
+        ) : !isSearching && query ? (
+          <p>No images found for your search.</p>
+        ) : null}
       </div>
 
       {images.length > 0 && (
@@ -260,7 +365,9 @@ const ImageSearch = () => {
             ⬅ Prev
           </button>
           <span style={{ margin: "0 10px" }}>Page {page}</span>
-          <button onClick={() => setPage((prev) => prev + 1)}>
+          <button onClick={() => setPage((prev) => prev + 1)}
+            disabled={page >= totalPages}  // Add this condition
+          >
             Next ➡
           </button>
         </div>

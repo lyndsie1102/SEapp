@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 from models import User, RecentSearch, SavedSearchResult
 from OpenverseAPIClient import OpenverseClient
 import os
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -86,9 +87,10 @@ def save_search():
     # Create new saved search
     saved_search = RecentSearch(
         user_id=user_id,
-        search_query=query,
-        media_type=media_type,
-        total_results=total_results
+        search_query=data['query'],
+        media_type=data['media_type'],
+        total_results=len(data['results']),
+        filters=data.get('filters', {})
     )
     db.session.add(saved_search)
     db.session.flush()  # to get saved_search.id
@@ -121,7 +123,14 @@ def get_recent_searches():
         return jsonify([]), 200
 
     # Return a list of recent searches in JSON format
-    return jsonify([search.to_json() for search in recent_searches]), 200
+    return jsonify([{
+        'id': s.id,
+        'media_type': s.media_type,
+        'search_query': s.search_query,
+        'timestamp': s.timestamp.isoformat(),
+        'total_results': s.total_results,
+        'filters': s.filters
+    }for s in recent_searches]), 200
 
 
 
@@ -152,56 +161,62 @@ def search_images():
     if not query:
         return jsonify({"error": "Search query is required"}), 400
     
-    page = request.args.get('page', 1, type=int)
-    page_size = request.args.get('page_size', 20, type=int)
-    license_type = request.args.get("license")
-    source = request.args.get("source")
-    filetype = request.args.get("filetype")
-    
     try:
         results = ov_client.search_images(
             query=query,
-            page=page,
-            page_size=page_size,
-            license_type=license_type,
-            source=source,
-            filetype=filetype
+            page=request.args.get('page', 1, type=int),
+            page_size=request.args.get('page_size', 20, type=int),
+            license_type=request.args.get("license"),
+            source=request.args.get("source"),
+            filetype=request.args.get("filetype")
         )
+        return jsonify(results)
     except Exception as e:
+        if "Rate limit exceeded" in str(e):
+            return jsonify({
+                "error": str(e),
+                "code": "rate_limit_exceeded"
+            }), 429
         print(f"Error calling Openverse API: {e}")
-        return jsonify({"error": "Failed to fetch results from Openverse"}), 500
-
-    return jsonify(results)
+        return jsonify({"error": "Failed to fetch results"}), 500
 
 @app.route("/search_audio", methods=["GET"])
 def search_audio():
     query = request.args.get("q")
     if not query:
         return jsonify({"error": "Search query is required"}), 400
-
-    page = request.args.get('page', 1, type=int)
-    page_size = request.args.get('page_size', 20, type=int)
-    license_type = request.args.get("license")
-    source = request.args.get("source")
-    category = request.args.get("category")
-    filetype = request.args.get("filetype")
-
+    
     try:
         results = ov_client.search_audio(
             query=query,
-            page=page,
-            page_size=page_size,
-            license_type=license_type,
-            category=category,
-            source=source,
-            filetype=filetype
+            page=request.args.get('page', 1, type=int),
+            page_size=request.args.get('page_size', 20, type=int),
+            license_type=request.args.get("license"),
+            source=request.args.get("source"),
+            filetype=request.args.get("filetype"),
+            category=request.args.get("category")
         )
+        return jsonify(results)
     except Exception as e:
+        if "Rate limit exceeded" in str(e):
+            return jsonify({
+                "error": str(e),
+                "code": "rate_limit_exceeded"
+            }), 429
         print(f"Error calling Openverse API: {e}")
         return jsonify({"error": "Failed to fetch audio results"}), 500
-    
-    return jsonify(results)
-    
+
+@app.route("/rate_limit", methods=["GET"])
+def get_rate_limit():
+    try:
+        limits = ov_client.check_rate_limit()
+        return jsonify({
+            "remaining": limits['remaining'],
+            "limit": limits['limit'],
+            "reset_in": max(0, limits['reset'] - datetime.datetime.now().timestamp())
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 
