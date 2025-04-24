@@ -1,6 +1,6 @@
 import pytest
 from main import app, db
-from models import User
+from models import User, RecentSearch, SavedSearchResult
 from werkzeug.security import generate_password_hash
 import json
 from flask_jwt_extended import create_access_token
@@ -46,4 +46,6 @@ def init_database(test_client):
     with app.app_context():
         db.session.remove()
         User.query.delete()
+        SavedSearchResult.query.delete()
+        RecentSearch.query.delete()
         db.session.commit()
