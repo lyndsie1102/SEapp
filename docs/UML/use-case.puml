@@ -1,0 +1,12 @@
+@startuml
+!theme mars
+left to right direction
+actor User as U
+rectangle "Media Search App" {
+  U --> (User Authentication/Logout)
+  U --> (Search Media)
+  U --> (Save Search History)
+  U --> (Filter Results)
+  U --> (View/Delete Recent Searches)
+}
+@enduml

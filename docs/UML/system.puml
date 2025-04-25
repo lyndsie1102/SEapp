@@ -1,0 +1,43 @@
+@startuml
+!theme mars
+actor User
+
+package "Client (React)" {
+  [Login Page]
+  [Register Page]
+  [Search Page]
+  [Recent Searches Page]
+}
+
+package "Server (Flask/FastAPI)" {
+  [Auth Controller]
+  [Search Controller]
+  [RecentSearch Controller]
+  [OpenverseAPIClient]
+}
+
+database "Database (PostgreSQL or SQLite)" {
+  [Users Table]
+  [RecentSearches Table]
+  [SavedSearchResults Table]
+}
+
+cloud "Openverse API" as Openverse
+
+User --> [Login Page]
+User --> [Register Page]
+User --> [Search Page]
+User --> [Recent Searches Page]
+
+[Login Page] --> [Auth Controller] : POST /login
+[Register Page] --> [Auth Controller] : POST /register
+[Search Page] --> [Search Controller] : GET /search_images /search_audio
+[Search Controller] --> [OpenverseAPIClient]
+[OpenverseAPIClient] --> Openverse
+[Search Page] --> [RecentSearch Controller] : POST /save_search
+[Recent Searches Page] --> [RecentSearch Controller] : GET/DELETE /recent_searches
+
+[Auth Controller] --> [Users Table]
+[RecentSearch Controller] --> [RecentSearches Table]
+[RecentSearch Controller] --> [SavedSearchResults Table]
+@enduml
