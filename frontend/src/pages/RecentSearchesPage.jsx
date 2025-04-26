@@ -105,8 +105,8 @@ const RecentSearches = () => {
   );
 
   return (
-    <div className="recent-searches-container">
-      <h2 className="recent-searches-header">Recent Searches</h2>
+    <div className="header-container">
+      <h2 className="header-text">Recent Searches</h2>
       {error && <p className="error-message">{error}</p>}
 
       {isLoading ? (
@@ -151,7 +151,7 @@ const RecentSearches = () => {
                           safeSearch.filters
                         )}
                       >
-                        View Results
+                        View
                       </button>
                       <button
                         className="action-button delete-button"

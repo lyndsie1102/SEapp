@@ -7,7 +7,8 @@ import RegistrationForm from './pages/RegistrationForm';
 import ImageSearch from './pages/ImageSearch';
 import AudioSearch from './pages/AudioSearch';
 import RecentSearches from './pages/RecentSearchesPage';
-import ProtectedRoute from './components/ProtectRoute'; // Import the ProtectedRoute component
+import ProtectedRoute from './components/ProtectRoute'; 
+import Logout from './pages/Logout';
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegistrationForm />} />
-
+        <Route path="/logout" element={<Logout />} />
         {/* Protected Routes */}
         <Route
           path="/home/*"

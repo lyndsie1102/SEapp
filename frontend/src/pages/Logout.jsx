@@ -10,7 +10,6 @@ const Logout = () => {
   useEffect(() => {
     const performLogout = async () => {
       try {
-        // 1. Call the logout API endpoint
         const response = await fetch("http://localhost:5000/logout", {
           method: "POST",
           headers: {
@@ -19,51 +18,46 @@ const Logout = () => {
           }
         });
 
-        // 2. Handle response
         if (!response.ok) {
-          throw new Error("Logout failed on server");
+          throw new Error("Logout failed on server.");
         }
-
-        // 3. Clear client-side token regardless of API response
-        localStorage.removeItem("token");
-        
-        // 4. Redirect after short delay
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 1000); // Show message for 1 second
       } catch (err) {
         setError(err.message);
-        // Still clear local token and redirect even if API fails
-        localStorage.removeItem("token");
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 1500); // Slightly longer delay to show error
       } finally {
-        setLoading(false);
+        localStorage.removeItem("token");
+        // Step 1: Show spinner briefly
+        setTimeout(() => {
+          setLoading(false); // Will trigger render of error or continue to redirect
+        }, 300); // Let the spinner show up
       }
     };
 
     performLogout();
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, navigate]);
 
   return (
     <div className="logout-container">
       {loading ? (
-        <h2>Logging out...</h2>
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
       ) : error ? (
-        <>
+        <div className="error-message">
           <h2>Logout Error</h2>
           <p>{error}</p>
           <p>You have been logged out locally.</p>
-        </>
-      ) : (
-        <>
-          <h2>Logged Out Successfully</h2>
-          <p>Redirecting to home page...</p>
-        </>
-      )}
+        </div>
+      ) : null}
     </div>
   );
 };
-
 export default Logout;

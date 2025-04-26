@@ -337,20 +337,26 @@
   color: #e53e3e !important;  /* Red color */
 }
 
-.recent-searches-container {
+.header-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.recent-searches-header {
+
+.header-text {
   color: #2c3e50;
   margin-bottom: 30px;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
-  border-bottom: 2px solid #a03967;
   padding-bottom: 10px;
+  /* No text-align needed; flex handles alignment */
+}
+
+/* Ensure table spans full width */
+.searches-table {
+  width: 100%;
 }
 
 .error-message {
@@ -566,22 +572,6 @@
 }
 
 /* Recent Searches Page Styles */
-.recent-searches-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.recent-searches-header {
-  color: #2c3e50;
-  margin-bottom: 30px;
-  font-size: 28px;
-  font-weight: 600;
-  border-bottom: 2px solid #a03967;
-  padding-bottom: 10px;
-  text-align: center;
-}
 
 .error-message {
   color: #e74c3c;

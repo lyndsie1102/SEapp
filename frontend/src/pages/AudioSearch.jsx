@@ -55,8 +55,8 @@ const AudioSearch = () => {
   const handleSearch = () => performSearch(query);
 
   return (
-    <div className="audio-search-container" style={{ position: 'relative' }}>
-      <h2>Audio Search</h2>
+    <div className="header-container" style={{ position: 'relative' }}>
+      <h2 className="header-text">Audio Search</h2>
       <button
         onClick={() => setSavePopoverOpen(true)}
         className="save-search-button"

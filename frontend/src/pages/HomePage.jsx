@@ -7,10 +7,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Remove token from localStorage
-    localStorage.removeItem("token");
-    // Redirect to landing page
-    navigate("/");
+    navigate("/logout");
   };
 
   return (

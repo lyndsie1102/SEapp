@@ -52,8 +52,8 @@ const ImageSearch = () => {
   const handleSearch = () => performSearch(query);
 
   return (
-    <div className="image-search-container">
-      <h2>Image Search</h2>
+    <div className="header-container">
+      <h2 className="header-text">Image Search</h2>
       <button onClick={() => setSavePopoverOpen(true)} className="save-search-button">
         Save Search
       </button>
