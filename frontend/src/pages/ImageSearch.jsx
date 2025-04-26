@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import AdvancedFilter from "../components/AdvancedFilter";
+import SaveSearchPopover from "../components/SaveSearchPopover";
+import axios from 'axios';
 
 const ImageSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +14,9 @@ const ImageSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [pendingSourceFilter, setPendingSourceFilter] = useState("");
+  const [savePopoverAnchor, setSavePopoverAnchor] = useState(null);
+  const [savePopoverOpen, setSavePopoverOpen] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const [filterValues, setFilterValues] = useState({
     license: "",
     source: "",
@@ -24,6 +28,26 @@ const ImageSearch = () => {
     { name: "source", label: "Source", type: "text", placeholder: "e.g. stocksnap" },
     { name: "filetype", label: "File Type", type: "select", options: ["jpg", "png", "svg"] },
   ];
+
+  const handleSaveSearchClick = (event) => {
+    if (images.length === 0) {
+      alert("No results to save!");
+      return;
+    }
+
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    setPopoverPosition({
+      top: buttonRect.bottom + window.scrollY + 5,
+      left: buttonRect.left + window.scrollX
+    });
+    setSavePopoverOpen(!savePopoverOpen);
+  };
+
+  // Add this handler
+  const handlePopoverClose = () => {
+    setSavePopoverOpen(false);
+    setSavePopoverAnchor(null);
+  };
 
   const checkRateLimit = async () => {
     try {
@@ -200,46 +224,48 @@ const ImageSearch = () => {
     setPage(1);
   };
 
-  const handleSaveSearch = async () => {
-    if (images.length === 0) {
-      alert("No results to save!");
+  const handleSaveSearch = async (name) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to save searches");
       return;
     }
-
-    alert("Only the currently loaded results (Page 1) will be saved.");
-
+  
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/save_search", {
-        method: "POST",
+      const response = await axios.post("http://localhost:5000/save_search", {
+        name: name,
+        query: query,
+        media_type: "image",
+        results: images.map(item => ({ url: item.url })),
+        filters: filterValues
+      }, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query,
-          media_type: "image",  // Defined here
-          results: images.map(item => ({ url: item.url })),
-          filters: filterValues  // Now properly formatted
-        }),
+        }
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert("Search saved successfully!");
-      } else {
-        alert("Error saving search: " + data.error);
-      }
+  
+      return response.data;
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error saving search:", error);
+      if (error.response) {
+        throw error.response;  // <<< THROW the full response, not a new Error
+      }
+      throw new Error('Failed to save search. Please try again.');
     }
   };
-
+  
 
   return (
-    <div>
+    <div className="image-search-container" style={{ position: 'relative' }}>
       <h2>Image Search</h2>
-      <button onClick={handleSaveSearch}>Save Search</button>
+      <button
+        onClick={handleSaveSearchClick}
+        className="save-search-button"
+        aria-describedby="save-search-popover"
+      >
+        Save Search
+      </button>
 
       {/* Search and Filter Container */}
       <div className="search-container">
@@ -372,6 +398,18 @@ const ImageSearch = () => {
           </button>
         </div>
       )}
+
+      {savePopoverOpen && (
+        <div className="popover-overlay">
+          <div className="save-popover">
+            <SaveSearchPopover
+              onClose={handlePopoverClose}
+              onSave={handleSaveSearch}
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

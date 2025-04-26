@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import Config, db
 from werkzeug.security import check_password_hash
-from models import User, RecentSearch, SavedSearchResult
+from models import User, RecentSearch
 from OpenverseAPIClient import OpenverseClient
 import os
 import datetime
@@ -67,60 +67,44 @@ def save_search():
     user_id = get_jwt_identity()
     data = request.get_json()
 
+    name = data.get("name")
     query = data.get("query")
     media_type = data.get("media_type")
-    results = data.get("results")
 
-    if not query or not media_type or not results:
-        return jsonify({"error": "Query, media_type, and results are required"}), 400
-
-    total_results = len(results)
-
-    # Check how many saved searches this user has
-    saved_count = db.session.query(RecentSearch).filter_by(user_id=user_id).count()
-    if saved_count >= 10:
-        # Delete the oldest one
-        oldest_search = db.session.query(RecentSearch).filter_by(user_id=user_id).order_by(RecentSearch.timestamp.asc()).first()
-        db.session.delete(oldest_search)
-        db.session.commit()
+    if not name or not query or not media_type:
+        return jsonify({"error": "Name, query, and media_type are required"}), 400
+    
+    existing_search = RecentSearch.query.filter_by(user_id=user_id, name=name).first()
+    if existing_search:
+        return jsonify({"error": "Name already exists. Please choose another name."}), 409
 
     # Create new saved search
     saved_search = RecentSearch(
         user_id=user_id,
-        search_query=data['query'],
-        media_type=data['media_type'],
-        total_results=len(data['results']),
+        name=name,
+        search_query=query,
+        media_type=media_type,
+        total_results=len(data.get('results', [])),
         filters=data.get('filters', {})
     )
     db.session.add(saved_search)
-    db.session.flush()  # to get saved_search.id
-
-    # Save results URLs
-    for result in results:
-        search_result = SavedSearchResult(
-            search_id=saved_search.id,
-            media_url=result['url'],  # Ensure this key matches your result structure
-            media_type=result.get('media_type', media_type)  # Assuming you also have media_type in your result
-        )
-        db.session.add(search_result)
-
     db.session.commit()
 
     return jsonify({"message": "Search saved successfully", "search_id": saved_search.id}), 201
-
-
 
 @app.route("/recent_searches", methods=["GET"])
 @jwt_required()
 def get_recent_searches():
     user_id = get_jwt_identity()
-
-    # Fetch recent searches for the user
-    recent_searches = RecentSearch.query.filter_by(user_id=user_id).order_by(RecentSearch.timestamp.desc()).all()
-
-    # If no searches found, return an empty list
-    if not recent_searches:
-        return jsonify([]), 200
+    
+    # Calculate date 30 days ago
+    thirty_days_ago = datetime.datetime.now() - datetime.timedelta(days=30)
+    
+    # Fetch recent searches for the user from last 30 days
+    recent_searches = RecentSearch.query.filter(
+        RecentSearch.user_id == user_id,
+        RecentSearch.timestamp >= thirty_days_ago
+    ).order_by(RecentSearch.timestamp.desc()).all()
 
     # Return a list of recent searches in JSON format
     return jsonify([{
@@ -130,8 +114,7 @@ def get_recent_searches():
         'timestamp': s.timestamp.isoformat(),
         'total_results': s.total_results,
         'filters': s.filters
-    }for s in recent_searches]), 200
-
+    } for s in recent_searches]), 200
 
 
 @app.route("/recent_searches/<int:search_id>", methods=["DELETE"])
