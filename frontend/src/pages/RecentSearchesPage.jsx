@@ -106,7 +106,7 @@ const RecentSearches = () => {
     <div className="recent-searches-container">
       <h2 className="recent-searches-header">Recent Searches</h2>
       {error && <p className="error-message">{error}</p>}
-
+  
       {isLoading ? (
         <p>Loading recent searches...</p>
       ) : recentSearches.length === 0 ? (
@@ -118,7 +118,7 @@ const RecentSearches = () => {
               <tr>
                 <th>Name</th>
                 <th>Media Type</th>
-                <th>Total Results</th>
+                <th>Results</th>
                 <th>Timestamp</th>
                 <th>Actions</th>
               </tr>
@@ -133,15 +133,16 @@ const RecentSearches = () => {
                   timestamp: search.timestamp || new Date().toISOString(),
                   filters: search.filters || {}
                 };
-
+  
                 return (
                   <tr key={safeSearch.id}>
                     <td>{safeSearch.search_query}</td>
                     <td>{safeSearch.media_type}</td>
                     <td>{safeSearch.total_results}</td>
-                    <td>{safeSearch.timestamp.replace('T', ' ')}</td>
+                    <td>{new Date(safeSearch.timestamp).toLocaleString()}</td>
                     <td>
                       <button
+                        className="action-button"
                         onClick={() => handleSearchClick(
                           safeSearch.search_query,
                           safeSearch.media_type,
@@ -151,6 +152,7 @@ const RecentSearches = () => {
                         View Results
                       </button>
                       <button
+                        className="action-button delete-button"
                         onClick={() => handleDeleteSearch(safeSearch.id)}
                       >
                         Delete
@@ -161,15 +163,14 @@ const RecentSearches = () => {
               })}
             </tbody>
           </table>
-
-          {/* Pagination controls - matches ImageSearch style */}
-          <div style={{ marginTop: "1rem", display: 'flex', alignItems: 'center' }}>
-            <div className="filter-group" style={{ marginRight: 'auto' }}>
-              <label className="filter-label">Items per page:</label>
+  
+          {/* Updated Pagination Controls */}
+          <div className="pagination-controls">
+            <div className="page-size-selector">
+              <label>Items per page:</label>
               <select
                 value={pageSize}
                 onChange={handlePageSizeChange}
-                className="filter-select"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
@@ -177,19 +178,21 @@ const RecentSearches = () => {
               </select>
             </div>
             
-            <button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-            >
-              ⬅ Prev
-            </button>
-            <span style={{ margin: "0 10px" }}>Page {page}</span>
-            <button 
-              onClick={() => setPage((prev) => prev + 1)}
-              disabled={page >= totalPages}
-            >
-              Next ➡
-            </button>
+            <div className="pagination-buttons">
+              <button
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </button>
+              <span className="page-info">Page {page} of {totalPages}</span>
+              <button 
+                onClick={() => setPage((prev) => prev + 1)}
+                disabled={page >= totalPages}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </>
       )}
