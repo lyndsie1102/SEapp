@@ -252,6 +252,14 @@
   gap: 1rem;
 }
 
+.audio-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+
 .audio-card {
   border: 1px solid #ccc;
   padding: 1rem;
@@ -443,61 +451,68 @@
 }
 
 /* Popover Styles */
-/* Save Search Popover Styles */
-.save-popover {
-  position: absolute;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  padding: 15px;
-  width: 280px;
+.popover-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
-.popover-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.save-popover {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1001; /* higher than overlay */
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  position: relative;
 }
 
+
 .popover-content h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 15px;
   color: #333;
-  font-weight: 600;
 }
 
 .popover-content .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-bottom: 15px;
 }
 
 .popover-content .form-group label {
-  font-size: 14px;
-  color: #555;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
 }
 
 .popover-content .form-group input {
+  width: 100%;
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .popover-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .popover-actions button {
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 4px;
-  font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 14px;
 }
 
 .popover-actions button:first-child {
@@ -521,31 +536,31 @@
 }
 
 .message {
-  font-size: 13px;
-  padding: 6px 10px;
+  margin-top: 10px;
+  padding: 8px;
   border-radius: 4px;
-  margin: 5px 0 0 0;
+  font-size: 14px;
 }
 
 .message.success {
-  background-color: #e6ffed;
-  color: #1a7f37;
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .message.error {
-  background-color: #ffebee;
-  color: #d32f2f;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .popover-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); /* faded background */
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* <- this fades the background */
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 999; /* just below .save-popover's z-index of 1000 */
+  align-items: center;
+  z-index: 1000;
 }
