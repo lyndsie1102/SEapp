@@ -1,8 +1,18 @@
+// HomePage.js
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import "../App.css";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove token from localStorage
+    localStorage.removeItem("token");
+    // Redirect to landing page
+    navigate("/");
+  };
+
   return (
     <div className="home-container">
       <nav className="sidebar">
@@ -12,12 +22,11 @@ const HomePage = () => {
           <li><Link to="/home/imagesearch">📷 Image Search</Link></li>
           <li><Link to="/home/audiosearch">🎵 Audio Search </Link></li>
           <li><Link to="/home/recentsearches">📁 Recent Searches</Link></li>
-          <li><Link to="/">🚪 Logout</Link></li>
+          <li><button onClick={handleLogout} className="logout-button">🚪 Logout</button></li>
         </ul>
       </nav>
 
       <main className="home-content">
-        {/* This is where nested routes will render */}
         <Outlet />
       </main>
     </div>

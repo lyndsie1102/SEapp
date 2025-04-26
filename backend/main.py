@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 from config import Config, db
 from werkzeug.security import check_password_hash
 from models import User, RecentSearch
@@ -59,6 +59,14 @@ def login():
             "token_type": "Bearer"
         })
     return jsonify({"msg": "Invalid credentials"}), 401
+
+
+@app.route("/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    # Instruct client to delete the token
+    return jsonify({"message": "Successfully logged out. Please delete the token on client side."}), 200
 
 
 @app.route("/save_search", methods=["POST"])

@@ -50,7 +50,7 @@ const SaveSearchPopover = ({ onClose, onSave }) => {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. 'Nature Sounds'"
+          placeholder="e.g. 'name'"
           autoFocus
         />
       </div>

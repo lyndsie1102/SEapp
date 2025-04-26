@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PaginationControls from '../components/PaginationControls';
 
 const RecentSearches = () => {
   const [recentSearches, setRecentSearches] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -94,6 +95,7 @@ const RecentSearches = () => {
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
+    setPage(1); // Reset to first page when page size changes
   };
 
   // Calculate the current page's data
@@ -106,7 +108,7 @@ const RecentSearches = () => {
     <div className="recent-searches-container">
       <h2 className="recent-searches-header">Recent Searches</h2>
       {error && <p className="error-message">{error}</p>}
-  
+
       {isLoading ? (
         <p>Loading recent searches...</p>
       ) : recentSearches.length === 0 ? (
@@ -133,7 +135,7 @@ const RecentSearches = () => {
                   timestamp: search.timestamp || new Date().toISOString(),
                   filters: search.filters || {}
                 };
-  
+
                 return (
                   <tr key={safeSearch.id}>
                     <td>{safeSearch.search_query}</td>
@@ -163,36 +165,27 @@ const RecentSearches = () => {
               })}
             </tbody>
           </table>
-  
+
           {/* Updated Pagination Controls */}
-          <div className="pagination-controls">
-            <div className="page-size-selector">
-              <label>Items per page:</label>
+          <div className="pagination-controls-container">
+            <div>
+              <label className="filter-label" style={{ marginRight: "8px" }}>Items per page:</label>
               <select
                 value={pageSize}
                 onChange={handlePageSizeChange}
+                className="filter-select"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={30}>30</option>
               </select>
             </div>
-            
-            <div className="pagination-buttons">
-              <button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                disabled={page === 1}
-              >
-                Previous
-              </button>
-              <span className="page-info">Page {page} of {totalPages}</span>
-              <button 
-                onClick={() => setPage((prev) => prev + 1)}
-                disabled={page >= totalPages}
-              >
-                Next
-              </button>
-            </div>
+
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         </>
       )}
