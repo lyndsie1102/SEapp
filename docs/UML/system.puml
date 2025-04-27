@@ -19,7 +19,6 @@ package "Server (Flask/FastAPI)" {
 database "Database (PostgreSQL or SQLite)" {
   [Users Table]
   [RecentSearches Table]
-  [SavedSearchResults Table]
 }
 
 cloud "Openverse API" as Openverse
@@ -39,5 +38,4 @@ User --> [Recent Searches Page]
 
 [Auth Controller] --> [Users Table]
 [RecentSearch Controller] --> [RecentSearches Table]
-[RecentSearch Controller] --> [SavedSearchResults Table]
 @enduml

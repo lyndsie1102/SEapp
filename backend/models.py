@@ -1,20 +1,7 @@
 from config import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class Contact(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name   = db.Column(db.String(80), unique=False, nullable=False)
-    last_name    = db.Column(db.String(80), unique=False, nullable=False)
-    email        = db.Column(db.String(120), unique=True, nullable=False)
 
-    def to_json(self):
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "email": self.email,
-        }
-    
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, nullable=False)
@@ -35,20 +22,20 @@ class User(db.Model):
 class RecentSearch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    query = db.Column(db.String(120), nullable=False)
-    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp(), index=True)
-
-    user = db.relationship('User', backref=db.backref('recent_searches', lazy=True))
-     
-   
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'query', name='unique_user_query'),
-    )
+    name = db.Column(db.String(120), nullable=False)  # Add this new field
+    search_query = db.Column(db.String(120), nullable=False)
+    media_type = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+    total_results = db.Column(db.Integer, nullable=False)
+    filters = db.Column(db.JSON)
 
     def to_json(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "query": self.query,
-            "timestamp": self.timestamp.isoformat()
+            "name": self.name,  # Include name in the JSON output
+            "media_type": self.media_type,
+            "search_query": self.search_query,
+            "timestamp": self.timestamp.isoformat(),
+            "total_results": self.total_results,
+            "filters": self.filters
         }

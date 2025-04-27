@@ -3,7 +3,7 @@
 left to right direction
 actor User as U
 rectangle "Media Search App" {
-  U --> (User Authentication/Logout)
+  U --> (User Authentication)
   U --> (Search Media)
   U --> (Save Search History)
   U --> (Filter Results)
