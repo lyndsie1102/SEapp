@@ -1,14 +1,24 @@
 import React from 'react';
 
-const SearchResultsGrid = ({ items, mediaType, loading, error }) => {
+const SearchResultsGrid = ({ 
+  items, 
+  mediaType, 
+  loading, 
+  error, 
+  emptyMessage,
+  customClasses = {}
+}) => {
   if (loading) return <div className="loading-overlay"><div className="loading-spinner"></div></div>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (items.length === 0) return <p>No results found for your search.</p>;
+  if (items.length === 0 && emptyMessage) return <p>{emptyMessage}</p>;
+
+  const gridClass = customClasses.grid || `${mediaType}-grid`;
+  const boxClass = customClasses.box || `${mediaType}-box`;
 
   return (
-    <div className={`${mediaType}-grid`}>
+    <div className={gridClass}>
       {items.map((item, index) => (
-        <div key={index} className={`${mediaType}-box`}>
+        <div key={index} className={boxClass}>
           {mediaType === 'image' ? (
             <>
               <img

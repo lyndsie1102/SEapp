@@ -3,6 +3,7 @@ import useSearch from '../components/useSearch';
 import SearchFilters from '../components/SearchFilters';
 import PaginationControls from '../components/PaginationControls';
 import SaveSearchPopover from '../components/SaveSearchPopover';
+import SearchResultsGrid from '../components/SearchResultsGrid';
 
 const AudioSearch = () => {
   const [savePopoverOpen, setSavePopoverOpen] = useState(false);
@@ -56,14 +57,15 @@ const AudioSearch = () => {
 
   return (
     <div className="header-container" style={{ position: 'relative' }}>
-      <h2 className="header-text">Audio Search</h2>
-      <button
-        onClick={() => setSavePopoverOpen(true)}
-        className="save-search-button"
-        disabled={results.length === 0}
-      >
-        Save Search
-      </button>
+      <div className="search-header">
+        <h2 className="header-text">Audio Search</h2>
+        <button 
+          onClick={() => setSavePopoverOpen(true)} 
+          className="save-search-button"
+        >
+          Save Search
+        </button>
+      </div>
 
       <div className="search-container">
         <input
@@ -95,22 +97,18 @@ const AudioSearch = () => {
         <strong>Total Results: </strong>{totalResults}
       </div>
 
-      {isSearching && <div className="loading-overlay"><div className="loading-spinner"></div></div>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <div className="audio-results-grid">
-        {results.length > 0 ? (
-          results.map((audio, index) => (
-            <div key={index} className="audio-card">
-              <h4 className="audio-title">{audio.title || 'Untitled Audio'}</h4>
-              <audio controls src={audio.url} style={{ width: '100%' }}>
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-          ))
-        ) : !isSearching && query ? (
-          <p>No audio results found for your search.</p>
-        ) : null}
+      <div className="audio-results-container">
+        <SearchResultsGrid
+          items={results}
+          mediaType="audio"
+          loading={isSearching}
+          error={error}
+          emptyMessage={!isSearching && query ? "No audio results found for your search." : null}
+          customClasses={{
+            grid: "audio-results-grid",  // Use your existing grid class
+            box: "audio-card",          // Use your existing card class
+          }}
+        />
       </div>
 
       {results.length > 0 && (

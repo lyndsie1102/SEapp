@@ -53,10 +53,15 @@ const ImageSearch = () => {
 
   return (
     <div className="header-container">
-      <h2 className="header-text">Image Search</h2>
-      <button onClick={() => setSavePopoverOpen(true)} className="save-search-button">
-        Save Search
-      </button>
+      <div className="search-header">
+        <h2 className="header-text">Image Search</h2>
+        <button 
+          onClick={() => setSavePopoverOpen(true)} 
+          className="save-search-button"
+        >
+          Save Search
+        </button>
+      </div>
 
       <div className="search-container">
         <input
