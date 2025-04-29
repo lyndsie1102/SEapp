@@ -92,10 +92,10 @@ const AudioSearch = () => {
           onPageSizeChange={handlePageSizeChange}
         />
       </div>
+      
+ 
+      <div className="total-results">Total Results</div>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <strong>Total Results: </strong>{totalResults}
-      </div>
 
       <div className="audio-results-container">
         <SearchResultsGrid

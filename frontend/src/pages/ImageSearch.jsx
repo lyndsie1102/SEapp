@@ -83,11 +83,9 @@ const ImageSearch = () => {
           onPageSizeChange={handlePageSizeChange}
         />
       </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <strong>Total Results: </strong>{totalResults}
-      </div>
-
+      
+      <div className="total-results">Total Results</div>
+     
       <SearchResultsGrid items={results} mediaType="image" loading={isSearching} error={error} />
 
       {results.length > 0 && (
