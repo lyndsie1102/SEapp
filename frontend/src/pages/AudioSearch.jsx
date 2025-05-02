@@ -105,8 +105,8 @@ const AudioSearch = () => {
           error={error}
           emptyMessage={!isSearching && query ? "No audio results found for your search." : null}
           customClasses={{
-            grid: "audio-results-grid",  // Use your existing grid class
-            box: "audio-card",          // Use your existing card class
+            grid: "audio-results-grid",  
+            box: "audio-card",          
           }}
         />
       </div>
@@ -122,12 +122,12 @@ const AudioSearch = () => {
       {savePopoverOpen && (
         <div className="popover-overlay">
           <div className="save-popover">
-            <div className="popover-content"> {/* ADD THIS DIV */}
+            <div className="popover-content">
               <SaveSearchPopover
                 onClose={handlePopoverClose}
                 onSave={(name) => handleSaveSearch(name, 'audio')}
               />
-            </div> {/* CLOSE DIV */}
+            </div>
           </div>
         </div>
       )}

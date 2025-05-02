@@ -7,6 +7,11 @@ import SearchResultsGrid from '../components/SearchResultsGrid';
 import useSearch from '../components/useSearch';
 
 const ImageSearch = () => {
+  const [savePopoverOpen, setSavePopoverOpen] = useState(false);
+  const handlePopoverClose = () => {
+    setSavePopoverOpen(false);
+  };
+
   const initialFilters = {
     license: "",
     source: "",
@@ -33,10 +38,10 @@ const ImageSearch = () => {
     totalResults,
     filters,
     setFilters,
-    performSearch
+    performSearch,
+    handleSaveSearch
   } = useSearch(initialFilters, '/search_images');
 
-  const [savePopoverOpen, setSavePopoverOpen] = useState(false);
 
   const handleFilterChange = (name, value) => {
     const newFilters = { ...filters, [name]: value };
@@ -55,8 +60,8 @@ const ImageSearch = () => {
     <div className="header-container">
       <div className="search-header">
         <h2 className="header-text">Image Search</h2>
-        <button 
-          onClick={() => setSavePopoverOpen(true)} 
+        <button
+          onClick={() => setSavePopoverOpen(true)}
           className="save-search-button"
         >
           Save Search
@@ -83,24 +88,30 @@ const ImageSearch = () => {
           onPageSizeChange={handlePageSizeChange}
         />
       </div>
-      
+
       <div className="total-results">Total Results</div>
-     
+
       <SearchResultsGrid items={results} mediaType="image" loading={isSearching} error={error} />
 
       {results.length > 0 && (
-        <PaginationControls 
-          page={page} 
-          totalPages={totalPages} 
-          onPageChange={setPage} 
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
         />
       )}
 
       {savePopoverOpen && (
-        <SaveSearchPopover
-          onClose={() => setSavePopoverOpen(false)}
-          onSave={(name) => handleSaveSearch(name, 'image')}
-        />
+        <div className="popover-overlay">F
+          <div className="save-popover">
+            <div className="popover-content">
+              <SaveSearchPopover
+                onClose={handlePopoverClose}
+                onSave={(name) => handleSaveSearch(name, 'image')}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
