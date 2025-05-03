@@ -2,9 +2,6 @@ import requests
 import time
 from typing import Dict, Any, Optional, List
 import os
-from dotenv import load_dotenv
-
-load_dotenv("dev.env")
 
 class OpenverseClient:
     

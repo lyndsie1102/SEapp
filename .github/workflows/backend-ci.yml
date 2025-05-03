@@ -4,6 +4,9 @@ jobs:
   test-backend:
     name: Test Backend Code
     runs-on: ubuntu-latest
+    env:
+      OPENVERSE_CLIENT_ID: ${{ secrets.OPENVERSE_CLIENT_ID }}
+      OPENVERSE_CLIENT_SECRET: ${{ secrets.OPENVERSE_CLIENT_SECRET }}
 
     steps:
       - name: Check out code
