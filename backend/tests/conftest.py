@@ -6,9 +6,14 @@ import json
 from flask_jwt_extended import create_access_token
 from dotenv import load_dotenv
 
+@pytest.fixture(scope='session')
+def app_ctx():
+    """Application context fixture for the entire test session"""
+    with app.app_context():
+        yield
 
 @pytest.fixture(scope='module')
-def test_client():
+def test_client(app_ctx):
     # Configure test app
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
