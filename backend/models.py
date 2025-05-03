@@ -13,6 +13,13 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    recent_searches = db.relationship(
+        'RecentSearch', 
+        backref='user', 
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
     def to_json(self):
         return {
             "id": self.id,

@@ -1,4 +1,3 @@
-// LoginForm.js
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +33,7 @@ const LoginForm = () => {
 
   return (
     <div>
+      <h1 className="app-title">Welcome</h1>
       <form onSubmit={handleLogin}>
         <input
           type="email"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import ImageSearch from '../pages/ImageSearch';
+import AudioSearch from '../pages/AudioSearch';
 import '@testing-library/jest-dom';
 
 // Mock the useSearch hook
@@ -10,7 +10,7 @@ jest.mock('../components/useSearch', () => ({
   default: jest.fn(),
 }));
 
-describe('ImageSearch Component', () => {
+describe('AudioSearch Component', () => {
   const mockUseSearch = {
     query: '',
     setQuery: jest.fn(),
@@ -23,7 +23,7 @@ describe('ImageSearch Component', () => {
     totalPages: 1,
     isSearching: false,
     totalResults: 0,
-    filters: { license: '', source: '', filetype: '' },
+    filters: { category: '', license: '', source: '' },
     setFilters: jest.fn(),
     performSearch: jest.fn(),
     handleSaveSearch: jest.fn(),
@@ -33,7 +33,7 @@ describe('ImageSearch Component', () => {
     require('../components/useSearch').default.mockImplementation(() => mockUseSearch);
     render(
       <MemoryRouter>
-        <ImageSearch />
+        <AudioSearch />
       </MemoryRouter>
     );
   });
@@ -42,17 +42,17 @@ describe('ImageSearch Component', () => {
     jest.clearAllMocks();
   });
 
-  test('renders ImageSearch component with basic elements', () => {
-    expect(screen.getByText('Image Search')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Search for images...')).toBeInTheDocument();
+  test('renders AudioSearch component with basic elements', () => {
+    expect(screen.getByText('Audio Search')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search for audios...')).toBeInTheDocument();
     expect(screen.getByText('Search')).toBeInTheDocument();
     expect(screen.getByText('Save Search')).toBeInTheDocument();
   });
 
   test('displays search input and responds to input changes', () => {
-    const searchInput = screen.getByPlaceholderText('Search for images...');
-    fireEvent.change(searchInput, { target: { value: 'cats' } });
-    expect(mockUseSearch.setQuery).toHaveBeenCalledWith('cats');
+    const searchInput = screen.getByPlaceholderText('Search for audios...');
+    fireEvent.keyDown(searchInput, { key: 'Enter' });
+    expect(mockUseSearch.performSearch).toHaveBeenCalled();
   });
 
   test('triggers search when search button is clicked', () => {
@@ -65,13 +65,11 @@ describe('ImageSearch Component', () => {
       ...mockUseSearch,
       isSearching: true,
     }));
-
     render(
       <MemoryRouter>
-        <ImageSearch />
+        <AudioSearch />
       </MemoryRouter>
     );
-
     expect(screen.getByText('Searching...')).toBeInTheDocument();
   });
 
@@ -84,11 +82,11 @@ describe('ImageSearch Component', () => {
 
     render(
       <MemoryRouter>
-        <ImageSearch />
+        <AudioSearch />
       </MemoryRouter>
     );
-
-    expect(screen.getByText('No image results found for your search.')).toBeInTheDocument();
+    
+    expect(screen.getByText('No audio results found for your search.')).toBeInTheDocument();
   });
 
   test('displays error message when there is an error', () => {
@@ -96,61 +94,49 @@ describe('ImageSearch Component', () => {
       ...mockUseSearch,
       error: 'Failed to fetch results',
     }));
-
     render(
       <MemoryRouter>
-        <ImageSearch />
+        <AudioSearch />
       </MemoryRouter>
     );
-
     expect(screen.getByText('Failed to fetch results')).toBeInTheDocument();
   });
 
-  test('shows image-specific filters with proper labels and controls', () => {
+  test('shows audio-specific filters', () => {
     // Test that all filter labels are present
+    expect(screen.getByText(/Category\s*:/)).toBeInTheDocument();
     expect(screen.getByText(/License\s*:/)).toBeInTheDocument();
     expect(screen.getByText(/Source\s*:/)).toBeInTheDocument();
-    expect(screen.getByText(/File Type\s*:/)).toBeInTheDocument();
-  
+
     // Get all comboboxes (select elements)
     const comboboxes = screen.getAllByRole('combobox');
-    expect(comboboxes.length).toBe(3);
+    expect(comboboxes.length).toBe(3); // Category, License, Items per page
 
     // Get all filter groups
     const filterGroups = document.querySelectorAll('.filter-group');
-  
-    // Test License filter options
-    const licenseFilter = filterGroups[0]
+
+    // Test Category filter
+    const categoryFilter = filterGroups[0];
+    expect(within(categoryFilter).getByText(/Category\s*:/)).toBeInTheDocument();
+    const categorySelect = within(categoryFilter).getByRole('combobox');
+    expect(within(categorySelect).getByRole('option', { name: 'Any' })).toBeInTheDocument();
+    expect(within(categorySelect).getByRole('option', { name: 'music' })).toBeInTheDocument();
+    expect(within(categorySelect).getByRole('option', { name: 'sound_effect' })).toBeInTheDocument();
+
+    // Test License filter
+    const licenseFilter = filterGroups[1];
     expect(within(licenseFilter).getByText(/License\s*:/)).toBeInTheDocument();
     const licenseSelect = within(licenseFilter).getByRole('combobox');
-    expect(screen.getAllByRole('option', { name: 'Any' })).toHaveLength(2); // Present in both License and File Type
-    expect(screen.getByRole('option', { name: 'cc0' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'by' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'by-sa' })).toBeInTheDocument();
-  
-    // Test File Type filter options
-    const fileTypeFilter = filterGroups[2]
-    expect(within(fileTypeFilter).getByText(/File Type\s*:/)).toBeInTheDocument();
-    const fileTypeSelect = within(fileTypeFilter).getByRole('combobox');
-    expect(screen.getByRole('option', { name: 'jpg' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'png' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'svg' })).toBeInTheDocument();
-  
-    // Test Source filter
-    const sourceFilter = filterGroups[1];
-    expect(within(sourceFilter).getByText(/Source\s*:/)).toBeInTheDocument();
-    expect(within(sourceFilter).getByPlaceholderText('e.g. stocksnap')).toBeInTheDocument();
-  });
-  
-  test('handles filter changes correctly', () => {
-    render(
-      <MemoryRouter>
-        <ImageSearch />
-      </MemoryRouter>
-    );
-  
+    expect(within(licenseSelect).getByRole('option', { name: 'Any' })).toBeInTheDocument();
+    expect(within(licenseSelect).getByRole('option', { name: 'by' })).toBeInTheDocument();
+    expect(within(licenseSelect).getByRole('option', { name: 'cc0' })).toBeInTheDocument();
+    expect(within(licenseSelect).getByRole('option', { name: 'by-nc' })).toBeInTheDocument();
 
-});
+    // Test Source filter
+    const sourceFilter = filterGroups[2];
+    expect(within(sourceFilter).getByText(/Source\s*:/)).toBeInTheDocument();
+    expect(within(sourceFilter).getByPlaceholderText('e.g. wikimedia_audio')).toBeInTheDocument();
+  });
 
   test('opens save search popover when save button is clicked', () => {
     fireEvent.click(screen.getByText('Save Search'));

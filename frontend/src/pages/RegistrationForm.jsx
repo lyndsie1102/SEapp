@@ -24,8 +24,10 @@ function Register() {
 
     if (!isValidEmail(form.email)) {
       setError("Please enter a valid email address");
+      console.log(error);
       return;
     }
+
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
@@ -56,7 +58,8 @@ function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
+    <div>
+      <h1 className="app-title">Registration</h1>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-field">

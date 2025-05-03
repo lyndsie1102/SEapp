@@ -1,9 +1,15 @@
 import pytest
 from main import app, db
-from models import User, RecentSearch, SavedSearchResult
+from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 import json
 from flask_jwt_extended import create_access_token
+from dotenv import load_dotenv
+
+load_dotenv("backend/dev.env")
+
+
+
 
 @pytest.fixture(scope='module')
 def test_client():
@@ -46,6 +52,5 @@ def init_database(test_client):
     with app.app_context():
         db.session.remove()
         User.query.delete()
-        SavedSearchResult.query.delete()
         RecentSearch.query.delete()
         db.session.commit()

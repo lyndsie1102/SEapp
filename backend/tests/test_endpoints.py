@@ -45,9 +45,11 @@ def test_save_search(test_client, init_database):
     # Create a test user and get a token
     user = User.query.filter_by(email='test@example.com').first()
     token = create_access_token(identity=str(user.id))
+    headers = {'Authorization': f'Bearer {token}'}
 
     # Test successful save
     data = {
+        "name": "test search",
         "query": "test query",
         "media_type": "image",
         "results": [{"url": "http://example.com/image1.jpg", "media_type": "image"}]
@@ -60,7 +62,12 @@ def test_save_search(test_client, init_database):
     # Test missing fields
     response = test_client.post('/save_search', json={}, headers=headers)
     assert response.status_code == 400
-    assert "Query, media_type, and results are required" in response.json['error']
+    assert "Name, query, and media_type are required" in response.json['error']
+    
+    #Test duplicate name
+    response = test_client.post('/save_search', json=data, headers=headers)
+    assert response.status_code == 409
+    assert "Name already exists. Please choose another name." in response.json['error']
 
 def test_get_recent_searches(test_client, init_database):
     # Create a test user and get a token
@@ -70,6 +77,7 @@ def test_get_recent_searches(test_client, init_database):
     # Create some test searches
     search1 = RecentSearch(
         user_id=user.id,
+        name="query 1",
         search_query="query1",
         media_type="image",
         total_results=10,
@@ -77,6 +85,7 @@ def test_get_recent_searches(test_client, init_database):
     )
     search2 = RecentSearch(
         user_id=user.id,
+        name="query 2",
         search_query="query2",
         media_type="audio",
         total_results=5,
@@ -99,6 +108,7 @@ def test_delete_recent_search(test_client, init_database):
     # Create a test search
     search = RecentSearch(
         user_id=user.id,
+        name="test search",
         search_query="test query",
         media_type="image",
         total_results=5
@@ -117,13 +127,37 @@ def test_delete_recent_search(test_client, init_database):
     assert "Search not found or unauthorized" in response.json['error']
 
 def test_search_images(test_client, mocker):
-    # Mock the OpenverseClient
     mock_results = {"results": [{"id": 1, "title": "Test Image"}]}
-    mocker.patch('main.ov_client.search_images', return_value=mock_results)
+    mock_search = mocker.patch.object(
+        ov_client, 
+        'search_images', 
+        return_value=mock_results
+    )
 
-    response = test_client.get('/search_images?q=test')
+    # Test with all possible parameters
+    test_params = {
+        "q": "nature",
+        "page": "2",
+        "page_size": "30",
+        "license": "cc0",
+        "source": "flickr",
+        "filetype": "jpg"
+    }
+    response = test_client.get('/search_images', query_string=test_params)
+    
+    # Verify response
     assert response.status_code == 200
     assert response.json == mock_results
+    
+    # Verify client was called with correct parameters
+    mock_search.assert_called_once_with(
+        query="nature",
+        page=2,  
+        page_size=30, 
+        license_type="cc0",
+        source="flickr",
+        filetype="jpg"
+    )
 
     # Test missing query
     response = test_client.get('/search_images')
@@ -131,15 +165,46 @@ def test_search_images(test_client, mocker):
     assert "Search query is required" in response.json['error']
 
 def test_search_audio(test_client, mocker):
-    # Mock the OpenverseClient
     mock_results = {"results": [{"id": 1, "title": "Test Audio"}]}
-    mocker.patch('main.ov_client.search_audio', return_value=mock_results)
+    mock_search = mocker.patch.object(
+        ov_client,
+        'search_audio',
+        return_value=mock_results
+    )
 
-    response = test_client.get('/search_audio?q=test')
+    # Test with all possible parameters
+    test_params = {
+        "q": "jazz",
+        "page": "3",
+        "page_size": "15",
+        "license": "by",
+        "source": "jamendo",
+        "filetype": "mp3",
+        "category": "music"
+    }
+    response = test_client.get('/search_audio', query_string=test_params)
+    
+    # Verify response
     assert response.status_code == 200
     assert response.json == mock_results
+    
+    # Verify client was called with correct parameters
+    mock_search.assert_called_once_with(
+        query="jazz",
+        page=3,
+        page_size=15,
+        license_type="by",
+        source="jamendo",
+        filetype="mp3",
+        category="music"
+    )
 
-    # Test missing query
-    response = test_client.get('/search_audio')
-    assert response.status_code == 400
-    assert "Search query is required" in response.json['error']
+    # Test rate limit error handling
+    mocker.patch.object(
+        ov_client,
+        'search_audio',
+        side_effect=Exception("Rate limit exceeded")
+    )
+    response = test_client.get('/search_audio?q=test')
+    assert response.status_code == 429
+    assert "Rate limit exceeded" in response.json['error']
