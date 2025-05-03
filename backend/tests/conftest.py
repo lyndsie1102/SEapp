@@ -55,3 +55,5 @@ def init_database(test_client):
         User.query.delete()
         RecentSearch.query.delete()
         db.session.commit()
+
+    print("Test ok")
