@@ -19,6 +19,13 @@ build-and-push-backend:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend-app:latest
+
 build-and-push-frontend:
     name: Build and Push Frontend Docker Image
     runs-on: ubuntu-latest
