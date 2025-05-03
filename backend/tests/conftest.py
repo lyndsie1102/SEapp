@@ -13,10 +13,11 @@ def test_client():
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'test-secret-key')  # Provide default for testing
     
     # Create all tables
     with app.app_context():
+        db.drop_all()  # Ensure clean start
         db.create_all()
     
     # Create test client
@@ -36,17 +37,25 @@ def test_client():
 
 @pytest.fixture
 def init_database(test_client):
+    # Clean up any existing data first
+    with app.app_context():
+        db.session.rollback()
+        User.query.delete()
+        RecentSearch.query.delete()
+        db.session.commit()
+    
     # Create test user
     user = User(email='test@example.com')
     user.set_password('testpassword')
     db.session.add(user)
     db.session.commit()
     
-    yield
+    yield user  # Yield the user object so tests can use it
     
     # Clean up after each test
     with app.app_context():
-        db.session.remove()
+        db.session.rollback()
         User.query.delete()
         RecentSearch.query.delete()
         db.session.commit()
+        db.session.remove()
