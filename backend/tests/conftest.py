@@ -1,14 +1,10 @@
 import pytest
+import os
 from main import app, db
 from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 import json
 from flask_jwt_extended import create_access_token
-from dotenv import load_dotenv
-
-load_dotenv("backend/dev.env")
-
-
 
 
 @pytest.fixture(scope='module')
@@ -17,7 +13,7 @@ def test_client():
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = 'test-secret-key'
+    app.config['JWT_SECRET_KEY'] = os.getenv('test-secret-key')
     
     # Create all tables
     with app.app_context():

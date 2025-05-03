@@ -7,6 +7,7 @@ jobs:
     env:
       OPENVERSE_CLIENT_ID: ${{ secrets.OPENVERSE_CLIENT_ID }}
       OPENVERSE_CLIENT_SECRET: ${{ secrets.OPENVERSE_CLIENT_SECRET }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
     steps:
       - name: Check out code
