@@ -1,0 +1,33 @@
+name: Docker Build
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  build-backend:
+    name: Build Backend Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build backend image
+        run: docker build -t myusername/backend-app:latest ./backend
+
+  build-frontend:
+    name: Build Frontend Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend image
+        run: docker build -t myusername/frontend-app:latest ./frontend
