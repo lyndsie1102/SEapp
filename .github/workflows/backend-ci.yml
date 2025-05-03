@@ -1,9 +1,5 @@
 name: Backend CI
-
-on:
-  push:
-  pull_request:
-
+on: [push, pull_request]
 jobs:
   test-backend:
     name: Test Backend Code
