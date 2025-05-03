@@ -23,7 +23,7 @@ function App() {
         path="/home/*"
         element={<ProtectedRoute element={<HomePage />} />}
       >
-        <Route path="" element={<div>Welcome to Huyen's app!</div>} />
+        <Route path="" element={<div>Welcome</div>} />
         <Route path="imagesearch" element={<ImageSearch />} />
         <Route path="audiosearch" element={<AudioSearch />} />
         <Route path="recentsearches" element={<RecentSearches />} />
