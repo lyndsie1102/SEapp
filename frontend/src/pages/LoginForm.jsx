@@ -34,7 +34,7 @@ const LoginForm = () => {
 
   return (
     <div>
-      <h1 className="app-title">Welcome to Huyen's app</h1>
+      <h1 className="app-title">Welcome</h1>
       <form onSubmit={handleLogin}>
         <input
           type="email"
