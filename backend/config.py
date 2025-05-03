@@ -10,6 +10,5 @@ db = SQLAlchemy()
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///app.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # Token expires in 1 hour
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     JWT_ALGORITHM = "HS256"

@@ -13,7 +13,7 @@ def test_client():
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('test-secret-key')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     
     # Create all tables
     with app.app_context():
