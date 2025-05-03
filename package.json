@@ -8,5 +8,6 @@
   },
   "jest": {
   "setupFiles": ["<rootDir>/jest.setup.js"]
-}
+},
+  "type": "module"
 }
