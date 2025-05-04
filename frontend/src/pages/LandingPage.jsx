@@ -21,7 +21,7 @@ const LandingPage = () => {
         <div className="image-section"></div>
         <div className="form-section">
           
-          {message && <p className="text-red-600">{message}</p>}
+          {message && <p className="message">{message}</p>}
           
           {isLogin ? <LoginForm /> : <RegistrationForm />}
           

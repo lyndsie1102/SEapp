@@ -60,14 +60,18 @@ function Register() {
   return (
     <div>
       <h1 className="app-title">Registration</h1>
-      {error && <p className="error-message">{error}</p>}
+      {error && (
+        <p className={`message ${error.includes('success') ? 'success' : 'error'}`}>
+          {error}
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-field">
           <input
             name="email"
             value={form.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Email"
             required
           />
@@ -78,7 +82,7 @@ function Register() {
             type="password"
             value={form.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Password"
             required
           />
@@ -89,7 +93,7 @@ function Register() {
             type="password"
             value={form.confirmPassword}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Confirm Password"
             required
           />

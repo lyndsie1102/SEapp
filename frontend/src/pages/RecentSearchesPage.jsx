@@ -7,8 +7,6 @@ const RecentSearches = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
-  // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -50,12 +48,13 @@ const RecentSearches = () => {
     fetchRecentSearches();
   }, []);
 
-  // Update total pages when pageSize changes
+
   useEffect(() => {
     setTotalPages(Math.ceil(recentSearches.length / pageSize));
-    setPage(1); // Reset to first page when page size changes
+    setPage(1);
   }, [pageSize, recentSearches.length]);
-
+ 
+  //Handle delete search
   const handleDeleteSearch = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -82,23 +81,23 @@ const RecentSearches = () => {
     }
   };
 
+  //Handle endpoints when search and filter
   const handleSearchClick = (search_query, mediaType, filters = {}) => {
     const params = new URLSearchParams();
     params.append('q', search_query);
 
-    // Add each filter if it exists
     if (filters.license) params.append('license', filters.license);
     if (filters.source) params.append('source', filters.source);
     if (filters.filetype) params.append('filetype', filters.filetype);
     navigate(`/home/${mediaType}search?${params.toString()}`);
   };
 
+  //Handle pagination
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setPage(1); // Reset to first page when page size changes
+    setPage(1); 
   };
 
-  // Calculate the current page's data
   const paginatedSearches = recentSearches.slice(
     (page - 1) * pageSize,
     page * pageSize
@@ -166,7 +165,7 @@ const RecentSearches = () => {
             </tbody>
           </table>
 
-          {/* Updated Pagination Controls */}
+      
           <div className="pagination-controls-container">
             <div>
               <label className="filter-label" style={{ marginRight: "8px" }}>Items per page:</label>

@@ -1,4 +1,5 @@
 import React from 'react';
+import fallbackImage from './default-fallback-image.png';
 
 const SearchResultsGrid = ({ 
   items, 
@@ -26,8 +27,8 @@ const SearchResultsGrid = ({
                 alt={item.title}
                 className={mediaType}
                 onError={(e) => {
-                  e.target.src = 'fallback-image-url.jpg';
-                  console.error("Failed to load media:", item.url);
+                  e.target.src = fallbackImage
+                  console.log(fallbackImage)
                 }}
               />
               <p className={`${mediaType}-title`}>{item.title}</p>
