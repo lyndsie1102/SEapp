@@ -17,10 +17,10 @@ const SaveSearchPopover = ({ onClose, onSave }) => {
       setMessage('Please enter a name for your search');
       return;
     }
-  
+
     setIsSaving(true);
     setMessage('');
-  
+
     try {
       await onSave(name);
       setMessage('Search saved successfully!');
@@ -31,7 +31,7 @@ const SaveSearchPopover = ({ onClose, onSave }) => {
       }, 800);
     } catch (errorResponse) {
       if (errorResponse?.data?.error) {
-        setMessage(errorResponse.data.error);  // ✅ Show "Name already exists..."
+        setMessage(errorResponse.data.error);
       } else {
         setMessage('Failed to save search. Please try again.');
       }
@@ -39,7 +39,6 @@ const SaveSearchPopover = ({ onClose, onSave }) => {
       setIsSaving(false);
     }
   };
-  
 
   return (
     <div className="popover-content">
@@ -47,6 +46,7 @@ const SaveSearchPopover = ({ onClose, onSave }) => {
       <div className="form-group">
         <label>Name:</label>
         <input
+          ref={inputRef}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}

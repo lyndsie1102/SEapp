@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PaginationControls from '../components/PaginationControls';
 
 const RecentSearches = () => {
   const [recentSearches, setRecentSearches] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -94,6 +95,7 @@ const RecentSearches = () => {
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
+    setPage(1); // Reset to first page when page size changes
   };
 
   // Calculate the current page's data
@@ -103,8 +105,8 @@ const RecentSearches = () => {
   );
 
   return (
-    <div className="recent-searches-container">
-      <h2 className="recent-searches-header">Recent Searches</h2>
+    <div className="header-container">
+      <h2 className="header-text">Recent Searches</h2>
       {error && <p className="error-message">{error}</p>}
 
       {isLoading ? (
@@ -118,7 +120,7 @@ const RecentSearches = () => {
               <tr>
                 <th>Name</th>
                 <th>Media Type</th>
-                <th>Total Results</th>
+                <th>Results</th>
                 <th>Timestamp</th>
                 <th>Actions</th>
               </tr>
@@ -139,18 +141,20 @@ const RecentSearches = () => {
                     <td>{safeSearch.search_query}</td>
                     <td>{safeSearch.media_type}</td>
                     <td>{safeSearch.total_results}</td>
-                    <td>{safeSearch.timestamp.replace('T', ' ')}</td>
+                    <td>{new Date(safeSearch.timestamp).toLocaleString()}</td>
                     <td>
                       <button
+                        className="action-button"
                         onClick={() => handleSearchClick(
                           safeSearch.search_query,
                           safeSearch.media_type,
                           safeSearch.filters
                         )}
                       >
-                        View Results
+                        View
                       </button>
                       <button
+                        className="action-button delete-button"
                         onClick={() => handleDeleteSearch(safeSearch.id)}
                       >
                         Delete
@@ -162,10 +166,10 @@ const RecentSearches = () => {
             </tbody>
           </table>
 
-          {/* Pagination controls - matches ImageSearch style */}
-          <div style={{ marginTop: "1rem", display: 'flex', alignItems: 'center' }}>
-            <div className="filter-group" style={{ marginRight: 'auto' }}>
-              <label className="filter-label">Items per page:</label>
+          {/* Updated Pagination Controls */}
+          <div className="pagination-controls-container">
+            <div>
+              <label className="filter-label" style={{ marginRight: "8px" }}>Items per page:</label>
               <select
                 value={pageSize}
                 onChange={handlePageSizeChange}
@@ -176,20 +180,12 @@ const RecentSearches = () => {
                 <option value={30}>30</option>
               </select>
             </div>
-            
-            <button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-            >
-              ⬅ Prev
-            </button>
-            <span style={{ margin: "0 10px" }}>Page {page}</span>
-            <button 
-              onClick={() => setPage((prev) => prev + 1)}
-              disabled={page >= totalPages}
-            >
-              Next ➡
-            </button>
+
+            <PaginationControls
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         </>
       )}
