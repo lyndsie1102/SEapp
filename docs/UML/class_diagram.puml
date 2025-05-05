@@ -19,14 +19,5 @@ class RecentSearch {
   +to_json()
 }
 
-class SavedSearchResult {
-  +id: Integer
-  +search_id: Integer
-  +media_url: String
-  +media_type: String
-  +to_json()
-}
-
 User "1" -- "many" RecentSearch : owns >
-RecentSearch "1" -- "many" SavedSearchResult : contains >
 @enduml
