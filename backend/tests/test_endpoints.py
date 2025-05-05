@@ -34,11 +34,18 @@ def test_login(test_client, init_database):
     assert response.status_code == 200
     assert 'access_token' in response.json
 
-    # Test invalid credentials
+    # Test incorrect password
     data = {'email': 'test@example.com', 'password': 'wrongpassword'}
     response = test_client.post('/login', json=data)
     assert response.status_code == 401
-    assert response.json == {"msg": "Invalid credentials"}
+    assert response.json == {"message": "Password does not match."}
+
+    # Test user does not exist
+    data = {'email': 'nonexistent@example.com', 'password': 'any_password'}
+    response = test_client.post('/login', json=data)
+    assert response.status_code == 404
+    assert response.json == {"message": "User does not exist."}
+
 
 
 def test_save_search(test_client, init_database):

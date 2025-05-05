@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 @pytest.fixture(scope='session')
 def app_ctx():
-    """Application context fixture for the entire test session"""
     with app.app_context():
         yield
 
@@ -47,13 +46,10 @@ def init_database(test_client):
     db.session.add(user)
     db.session.commit()
     
-    yield
+    yield user
     
     # Clean up after each test
     with app.app_context():
-        db.session.remove()
         User.query.delete()
         RecentSearch.query.delete()
         db.session.commit()
-
-    print("Test ok")

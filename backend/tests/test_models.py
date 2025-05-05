@@ -69,20 +69,36 @@ def test_recent_search_required_fields(init_database):
         db.session.commit()
     db.session.rollback()
 
-def test_model_relationships(init_database):
-    user = User.query.filter_by(email='test@example.com').first()
-    
-    # Create a search for the user
-    search = RecentSearch(
+def test_user_recent_search_relationship(init_database):
+    user = init_database  # this is the User instance returned by the fixture
+
+    # Create multiple RecentSearch entries for the user
+    search1 = RecentSearch(
         user_id=user.id,
-        name="relationship test",
-        search_query="test query",
+        name="search one",
+        search_query="cats",
         media_type="image",
-        total_results=10
+        total_results=5
     )
-    db.session.add(search)
+    search2 = RecentSearch(
+        user_id=user.id,
+        name="search two",
+        search_query="dogs",
+        media_type="video",
+        total_results=8
+    )
+    db.session.add_all([search1, search2])
     db.session.commit()
-    
-    # Test relationship
-    assert search in user.recent_searches
-    assert search.user == user
+
+    db.session.refresh(user)
+
+    # Assert relationships
+    assert len(user.recent_searches) >= 2
+    assert any(s.name == "search one" for s in user.recent_searches)
+    assert any(s.name == "search two" for s in user.recent_searches)
+
+    # Cascade delete test
+    db.session.delete(user)
+    db.session.commit()
+    assert RecentSearch.query.filter_by(user_id=user.id).count() == 0
+    assert user.id is not None, "User was not created successfully"
