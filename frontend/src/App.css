@@ -110,16 +110,11 @@
 }
 .image-box {
   border: 1px solid #ccc;
-  /* Border around each image box */
   padding: 10px;
   text-align: center;
-  /* Center the title below the image */
   background-color: #f9f9f9;
-  /* Light background color */
   border-radius: 8px;
-  /* Rounded corners */
   overflow: hidden;
-  /* Ensure the content fits within the box */
 }
 .image-box .image {
   width: 100%;
@@ -601,9 +596,7 @@
 .form-input {
   width: 100%;
   padding: 4px 2px;
-  /* px-4 py-2 = 1rem x 0.5rem */
   border: 1px solid #ccc;
   border-radius: 4px;
-  /* rounded */
   box-sizing: border-box;
 }
