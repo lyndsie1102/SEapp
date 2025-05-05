@@ -41,7 +41,7 @@ def test_client(app_ctx):
 @pytest.fixture
 def init_database(test_client):
     # Create test user
-    user = User(email='test@example.com')
+    user = User(email='test@example.com', _password_hash=generate_password_hash('testpassword'))
     user.set_password('testpassword')
     db.session.add(user)
     db.session.commit()
