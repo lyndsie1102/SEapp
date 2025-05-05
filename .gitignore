@@ -51,4 +51,4 @@ __pycache__
 Thumbs.db
 
 # env variables
-dev.env
+dev.envvenv/
