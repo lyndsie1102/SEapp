@@ -1,6 +1,6 @@
-// LoginForm.js
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -34,26 +34,37 @@ const LoginForm = () => {
 
   return (
     <div>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          required
-          onChange={(e) => setEmail(e.target.value)}
-        /><br />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          required
-          onChange={(e) => setPassword(e.target.value)}
-        /><br />
+      <h1 className="app-title">Welcome</h1>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div className="form-field">
+          <input
+            type="email"
+            className="form-input"
+            placeholder="Email"
+            value={email}
+            required
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="form-field">
+          <input
+            type="password"
+            placeholder="Password"
+            className="form-input"
+            value={password}
+            required
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
         <div className="button-container">
           <button type="submit" className="login-button">Login</button>
         </div>
       </form>
-      {message && <p className="text-red-600">{message}</p>}
+      {message && (
+        <p className={`message ${message.includes('success') ? 'success' : 'error'}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 };

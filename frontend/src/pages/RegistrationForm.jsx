@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
@@ -24,8 +24,10 @@ function Register() {
 
     if (!isValidEmail(form.email)) {
       setError("Please enter a valid email address");
+      console.log(error);
       return;
     }
+
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
@@ -56,15 +58,20 @@ function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      {error && <p className="error-message">{error}</p>}
+    <div>
+      <h1 className="app-title">Registration</h1>
+      {error && (
+        <p className={`message ${error.includes('success') ? 'success' : 'error'}`}>
+          {error}
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-field">
           <input
             name="email"
             value={form.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Email"
             required
           />
@@ -75,7 +82,7 @@ function Register() {
             type="password"
             value={form.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Password"
             required
           />
@@ -86,7 +93,7 @@ function Register() {
             type="password"
             value={form.confirmPassword}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded"
+            className="form-input"
             placeholder="Confirm Password"
             required
           />

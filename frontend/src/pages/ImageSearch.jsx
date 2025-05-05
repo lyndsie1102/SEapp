@@ -91,7 +91,13 @@ const ImageSearch = () => {
 
       <div className="total-results">Total Results</div>
 
-      <SearchResultsGrid items={results} mediaType="image" loading={isSearching} error={error} />
+      <SearchResultsGrid 
+      items={results} 
+      mediaType="image" 
+      loading={isSearching} 
+      error={error}
+      emptyMessage={!isSearching && query ? "No image results found for your search." : null}
+      />
 
       {results.length > 0 && (
         <PaginationControls

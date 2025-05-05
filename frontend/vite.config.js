@@ -1,11 +1,15 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './vitest.setup.js',
+  server: {
+    host: true,
+    allowedHosts: true,
+    proxy: {
+      '/search_images': 'http://127.0.0.1:5000',
+      '/search_audio': 'http://127.0.0.1:5000'
+    }
   },
-});
+})

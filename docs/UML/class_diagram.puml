@@ -1,0 +1,23 @@
+@startuml
+class User {
+  +id: Integer
+  +email: String
+  +password_hash: String
+  +set_password(password)
+  +check_password(password)
+  +to_json()
+}
+
+class RecentSearch {
+  +id: Integer
+  +user_id: Integer
+  +search_query: String
+  +media_type: String
+  +timestamp: DateTime
+  +total_results: Integer
+  +filters: JSON
+  +to_json()
+}
+
+User "1" -- "many" RecentSearch : owns >
+@enduml

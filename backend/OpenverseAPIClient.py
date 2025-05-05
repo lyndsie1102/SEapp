@@ -2,9 +2,6 @@ import requests
 import time
 from typing import Dict, Any, Optional, List
 import os
-from dotenv import load_dotenv
-
-load_dotenv("dev.env")
 
 class OpenverseClient:
     
@@ -53,7 +50,6 @@ class OpenverseClient:
             return None
         
     def check_rate_limit(self) -> Dict[str, Any]:
-        """Check current rate limit status"""
         try:
             response = requests.get(
                 f"{self.BASE_URL}/rate_limit/",
@@ -72,8 +68,6 @@ class OpenverseClient:
             return self.rate_limit
         
     def _make_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Centralized request handler with rate limit checking"""
-        # Check rate limit if it's been more than 1 minute since last check
         if time.time() - self.rate_limit['last_checked'] > 60:
             self.check_rate_limit()
 
@@ -92,8 +86,7 @@ class OpenverseClient:
             headers={"Authorization": f"Bearer {token}"},
             params=params
         )
-        
-        # Update rate limit from response headers if available
+
         if 'X-RateLimit-Remaining' in response.headers:
             self.rate_limit = {
                 'remaining': int(response.headers['X-RateLimit-Remaining']),

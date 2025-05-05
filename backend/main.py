@@ -51,14 +51,18 @@ def register():
 def login():
     data = request.get_json()
     user = User.query.filter_by(email=data['email']).first()
-    
-    if user and check_password_hash(user.password_hash, data['password']):
-        access_token = create_access_token(identity=str(user.id))
-        return jsonify({
-            "access_token": access_token,
-            "token_type": "Bearer"
-        })
-    return jsonify({"msg": "Invalid credentials"}), 401
+
+    if not user:
+        return jsonify({"message": "User does not exist."}), 404
+
+    if not check_password_hash(user._password_hash, data['password']):
+        return jsonify({"message": "Password does not match."}), 401
+
+    access_token = create_access_token(identity=str(user.id))
+    return jsonify({
+        "access_token": access_token,
+        "token_type": "Bearer"
+    })
 
 
 @app.route("/logout", methods=["POST"])
