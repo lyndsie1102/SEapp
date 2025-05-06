@@ -4,8 +4,6 @@ from config import db
 from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 import json
-from flask_jwt_extended import create_access_token
-from dotenv import load_dotenv
 
 @pytest.fixture(scope='session')
 def app_ctx():
