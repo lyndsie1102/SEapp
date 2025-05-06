@@ -28,7 +28,7 @@ jobs:
         run: pytest backend/tests/
 
       - name: Run backend tests with coverage
-        run: pytest --cov=. --cov-report=xml tests/
+        run: pytest --cov=main --cov-report=xml tests/
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
