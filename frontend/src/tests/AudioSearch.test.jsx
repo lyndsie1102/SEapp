@@ -138,6 +138,67 @@ describe('AudioSearch Component', () => {
     expect(within(sourceFilter).getByPlaceholderText('e.g. wikimedia_audio')).toBeInTheDocument();
   });
 
+  
+  test('handles filter changes correctly', () => {
+    const categorySelect = screen.getAllByRole('combobox')[0];
+    fireEvent.change(categorySelect, { target: { value: 'music' } });
+    
+    expect(mockUseSearch.setFilters).toHaveBeenCalledWith({
+      ...mockUseSearch.filters,
+      category: 'music'
+    });
+    expect(mockUseSearch.setPage).toHaveBeenCalledWith(1);
+  });
+
+  test('handles page size changes correctly', () => {
+    const pageSizeSelect = screen.getAllByRole('combobox')[2];
+    fireEvent.change(pageSizeSelect, { target: { value: '20' } });
+    
+    expect(mockUseSearch.setPageSize).toHaveBeenCalledWith(20);
+    expect(mockUseSearch.setPage).toHaveBeenCalledWith(1);
+  });
+
+  test('displays pagination controls when there are multiple pages', () => {
+    // Mock the useSearch hook with results and multiple pages
+    require('../components/useSearch').default.mockImplementation(() => ({
+      ...mockUseSearch,
+      results: [
+        { id: '1', title: 'Audio 1', creator: 'Artist 1', url: 'http://example.com/audio1.mp3' },
+        { id: '2', title: 'Audio 2', creator: 'Artist 2', url: 'http://example.com/audio2.mp3' },
+      ],
+      totalPages: 3,
+      totalResults: 20,
+    }));
+  
+    render(
+      <MemoryRouter>
+        <AudioSearch />
+      </MemoryRouter>
+    );
+  
+    // Check that pagination controls are rendered with the exact button text
+    expect(screen.getByRole('button', { name: /prev/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
+    expect(screen.getByText(/page 1/i)).toBeInTheDocument();
+  });
+
+  test('handles page changes via pagination controls', () => {
+    require('../components/useSearch').default.mockImplementation(() => ({
+      ...mockUseSearch,
+      results: [{ id: '1', title: 'Audio 1' }],
+      totalPages: 3,
+    }));
+    
+    render(
+      <MemoryRouter>
+        <AudioSearch />
+      </MemoryRouter>
+    );
+    
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(mockUseSearch.setPage).toHaveBeenCalledWith(2);
+  });
+
   test('opens save search popover when save button is clicked', () => {
     fireEvent.click(screen.getByText('Save Search'));
     expect(screen.getByText('Save Search')).toBeInTheDocument();
