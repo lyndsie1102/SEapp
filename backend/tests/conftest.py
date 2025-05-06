@@ -1,5 +1,6 @@
 import pytest
-from main import app, db
+from main import app
+from config import db
 from models import User, RecentSearch
 from werkzeug.security import generate_password_hash
 import json
