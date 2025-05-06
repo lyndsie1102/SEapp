@@ -20,3 +20,13 @@ jobs:
 
       - name: Run frontend tests
         run: npm test --prefix frontend
+
+      - name: Run frontend tests with coverage
+        run: npm test --prefix frontend -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: frontend/coverage/lcov.info
+          flags: frontend
