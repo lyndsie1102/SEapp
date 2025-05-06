@@ -11,7 +11,7 @@ def app_ctx():
     with app.app_context():
         yield
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def test_client(app_ctx):
     # Configure test app
     app.config['TESTING'] = True
