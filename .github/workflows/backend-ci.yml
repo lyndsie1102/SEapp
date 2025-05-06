@@ -29,7 +29,10 @@ jobs:
       - name: Run tests with coverage
         run: |
           cd backend
-          pytest tests --cov=main --cov-report=xml
+          pytest tests/ \
+            --cov=main \
+            --cov-report=xml \
+            --cov-fail-under=80
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

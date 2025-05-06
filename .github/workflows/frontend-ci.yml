@@ -19,7 +19,9 @@ jobs:
         run: npm install --prefix frontend
 
       - name: Run frontend tests
-        run: npm test --prefix frontend
+        run: |
+            npm test --prefix frontend
+            npm test -- --watchAll=false --coverage --coverageThreshold='{"global":{"lines":50}}'
 
       - name: Run frontend tests with coverage
         run: npm test --prefix frontend -- --coverage

@@ -19,7 +19,7 @@ beforeEach(() => {
   global.fetch = jest.fn(() => 
     Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({ success: true }), // Explicit success response
+      json: () => Promise.resolve({ success: true }),
     })
   );
 });
@@ -54,8 +54,7 @@ describe('RegistrationForm Component', () => {
                 <Register />
             </MemoryRouter>
         );
-
-        // Fill in ALL required fields to ensure form can submit
+        
         fireEvent.change(screen.getByPlaceholderText('Email'), {
             target: { value: 'invalid-email' }
         });
@@ -66,11 +65,8 @@ describe('RegistrationForm Component', () => {
             target: { value: 'password123' }
         });
 
-        // Submit form
         fireEvent.click(screen.getByRole('button', { name: /Register/i }));
 
-
-        // Check for error message with more flexible matching
         await waitFor(() => {
             const errorElements = screen.queryAllByText(/./);
             console.log('All text elements:', errorElements.map(el => el.textContent));
@@ -109,7 +105,6 @@ describe('RegistrationForm Component', () => {
     });
 
     test('handles successful registration', async () => {
-        // Mock successful response
         fetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ success: true }), 
@@ -138,7 +133,6 @@ describe('RegistrationForm Component', () => {
         fireEvent.click(screen.getByRole('button', { name: /Register/i }));
 
         await waitFor(() => {
-            // Verify fetch was called
             expect(fetch).toHaveBeenCalledWith('http://localhost:5000/register', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -148,7 +142,6 @@ describe('RegistrationForm Component', () => {
               }),
             });
         
-            // Verify navigation occurred
             expect(mockNavigate).toHaveBeenCalledWith('/', {
               state: { fromRegister: true }
             });
