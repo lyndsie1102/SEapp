@@ -1,4 +1,5 @@
 name: Backend CI
+
 on: [push, pull_request]
 
 jobs:
@@ -21,15 +22,13 @@ jobs:
           pip install -r backend/requirements.txt
           pip install pytest pytest-cov
 
-      - name: Run backend tests
-        run: pytest backend/tests/
-      
       - name: Run tests with coverage
         run: |
+          cd backend
           pytest --cov=main --cov-report=xml tests/
 
       - name: Upload coverage to Codecov
-        run: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: backend/coverage.xml
