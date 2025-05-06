@@ -29,11 +29,11 @@ jobs:
       - name: Run backend tests with coverage
         working-directory: ./backend
         run: |
-          pytest --cov=./ --cov-report=xml tests/
+          pytest --cov=main --cov-report=xml tests/
           
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./backend/coverage.xml
+          files: backend/coverage.xml
           flags: backend
