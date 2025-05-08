@@ -69,7 +69,6 @@ def login():
 @jwt_required()
 def logout():
     jti = get_jwt()["jti"]
-    # Instruct client to delete the token
     return jsonify({"message": "Successfully logged out. Please delete the token on client side."}), 200
 
 
@@ -109,16 +108,13 @@ def save_search():
 def get_recent_searches():
     user_id = get_jwt_identity()
     
-    # Calculate date 30 days ago
     thirty_days_ago = datetime.datetime.now() - datetime.timedelta(days=30)
     
-    # Fetch recent searches for the user from last 30 days
     recent_searches = RecentSearch.query.filter(
         RecentSearch.user_id == user_id,
         RecentSearch.timestamp >= thirty_days_ago
     ).order_by(RecentSearch.timestamp.desc()).all()
 
-    # Return a list of recent searches in JSON format
     return jsonify([{
         'id': s.id,
         'media_type': s.media_type,
@@ -134,7 +130,6 @@ def get_recent_searches():
 def delete_recent_search(search_id):
     user_id = get_jwt_identity()
     
-    # Secure query: Only fetch searches belonging to the current user
     search = RecentSearch.query.filter_by(id=search_id, user_id=user_id).first()
 
     if not search:

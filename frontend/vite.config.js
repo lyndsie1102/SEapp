@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: true,
+    port: 5173,
+    watch: {
+      usePolling: true  // Needed for Docker
+    },
     proxy: {
       '/search_images': 'http://127.0.0.1:5000',
       '/search_audio': 'http://127.0.0.1:5000'
