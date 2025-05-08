@@ -12,8 +12,16 @@ export default defineConfig({
       usePolling: true  // Needed for Docker
     },
     proxy: {
-      '/search_images': 'http://127.0.0.1:5000',
-      '/search_audio': 'http://127.0.0.1:5000'
+      '/search_images': {
+        target: 'http://backend:5000',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      },
+      '/search_audio': {
+        target: 'http://backend:5000',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
     }
   },
 })

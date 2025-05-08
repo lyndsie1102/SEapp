@@ -11,7 +11,9 @@ import ProtectedRoute from './components/ProtectRoute';
 import Logout from './pages/Logout';
 
 function App() {
+
   return (
+    
     <Routes>
       {/* Public Routes */}F
       <Route path="/" element={<LandingPage />} />
