@@ -94,7 +94,7 @@ const AudioSearch = () => {
       </div>
       
  
-      <div className="total-results">Total Results</div>
+      <div className="total-results">Total Results: {totalResults}</div>
 
 
       <div className="audio-results-container">

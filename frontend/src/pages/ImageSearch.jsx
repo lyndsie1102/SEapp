@@ -89,7 +89,7 @@ const ImageSearch = () => {
         />
       </div>
 
-      <div className="total-results">Total Results</div>
+      <div className="total-results">Total Results: {totalResults}</div>
 
       <SearchResultsGrid 
       items={results} 
