@@ -80,13 +80,18 @@ describe('ImageSearch Component', () => {
       ...mockUseSearch,
       query: 'nonexistent',
       results: [],
+      isSearching: false,
     }));
-
-    render(
+  
+    const { container } = render(
       <MemoryRouter>
         <ImageSearch />
       </MemoryRouter>
     );
+    
+    // Get by class name
+    const searchButton = container.querySelector('.search-button');
+    fireEvent.click(searchButton);
 
     expect(screen.getByText('No image results found for your search.')).toBeInTheDocument();
   });
