@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PaginationControls from '../components/PaginationControls';
+import useSearch from '../components/useSearch';  
 
 const RecentSearches = () => {
   const [recentSearches, setRecentSearches] = useState([]);

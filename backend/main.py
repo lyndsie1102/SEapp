@@ -95,7 +95,7 @@ def save_search():
         name=name,
         search_query=query,
         media_type=media_type,
-        total_results=len(data.get('results', [])),
+        total_results=data.get("total_results", 0),
         filters=data.get('filters', {})
     )
     db.session.add(saved_search)

@@ -77,6 +77,7 @@ const useSearch = (initialFilters, endpoint) => {
         query,
         media_type: mediaType,
         results: results.map(item => ({ url: item.url })),
+        total_results: totalResults,
         filters
       }, {
         headers: {
@@ -95,7 +96,6 @@ const useSearch = (initialFilters, endpoint) => {
     }
   };
 
-  // Initialize from URL
   useEffect(() => {
     const urlQuery = searchParams.get("q");
     const initialParams = {};
@@ -111,7 +111,7 @@ const useSearch = (initialFilters, endpoint) => {
     }
   }, []);
 
-  // Handle filter/page changes
+  
   useEffect(() => {
     if (query.trim()) {
       performSearch(query);

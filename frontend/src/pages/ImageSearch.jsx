@@ -8,6 +8,8 @@ import useSearch from '../components/useSearch';
 
 const ImageSearch = () => {
   const [savePopoverOpen, setSavePopoverOpen] = useState(false);
+  const [searchAttempted, setSearchAttempted] = useState(false);
+
   const handlePopoverClose = () => {
     setSavePopoverOpen(false);
   };
@@ -54,7 +56,12 @@ const ImageSearch = () => {
     setPage(1);
   };
 
-  const handleSearch = () => performSearch(query);
+  const handleSearch = () => {
+    setSearchAttempted(true);
+    performSearch(query);
+  };
+  
+  
 
   return (
     <div className="header-container">
@@ -96,7 +103,11 @@ const ImageSearch = () => {
       mediaType="image" 
       loading={isSearching} 
       error={error}
-      emptyMessage={!isSearching && query ? "No image results found for your search." : null}
+      emptyMessage={
+        searchAttempted && !isSearching && results.length === 0 
+          ? "No image results found for your search." 
+          : null
+      }
       />
 
       {results.length > 0 && (
